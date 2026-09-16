@@ -7,11 +7,11 @@
 
 ## 👤 스터디원
 
-|      |      |      |
+| <img src="https://avatars.githubusercontent.com/seongsoon1818" width=100> | <img src="https://avatars.githubusercontent.com/jaewoni314" width=100> | <img src="https://avatars.githubusercontent.com/satokitoki" width=100>|
 | :--: | :--: | :--: |
-|      |      |      |
-|      |      |      |
-|      |      |      |
+| [성순/이성진](https://github.com/seongsoon1818) | [워니/김재원](https://github.com/jaewoni314) | [사토/김민주](https://github.com/satokitoki) |
+| <img src="https://avatars.githubusercontent.com/taehwanlee203" width=100> |      |      |
+| [알라/이태환](https://github.com/taehwanlee203) |      |      |
 
 ## 💫commit 태그
 
