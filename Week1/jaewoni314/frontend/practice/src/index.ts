@@ -10,7 +10,7 @@ interface StudyMember {
 const members: StudyMember[] = [
   {
     id: 1,
-    name: "서희",
+    name: "재원",
     role: "leader",
     githubId: "kimyesol",
   },
