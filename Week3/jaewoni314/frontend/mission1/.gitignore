@@ -23,7 +23,4 @@ dist-ssr
 *.sln
 *.sw?
 
-# 이미지 에셋 (워크북 제공 파일, 커밋 제외)
-public/
-src/assets/
 README.md
