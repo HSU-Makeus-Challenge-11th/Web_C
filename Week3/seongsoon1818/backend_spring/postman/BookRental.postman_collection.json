@@ -1,0 +1,106 @@
+{
+  "info": {
+    "name": "Week3 도서 조회·대여·반납 API",
+    "description": "실제 DB의 categoryId, userId, bookId를 설정한 뒤 1 → 2 → 3 순서로 실행하세요. 대여 응답의 rentalId가 자동 저장됩니다.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "categoryId", "value": "1", "type": "string" },
+    { "key": "userId", "value": "1", "type": "string" },
+    { "key": "bookId", "value": "3", "type": "string" },
+    { "key": "rentalId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. 카테고리별 도서 조회",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/books/category/{{categoryId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["books", "category", "{{categoryId}}"]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "pm.test('요청한 카테고리의 도서만 반환', () => {",
+            "  const books = pm.response.json();",
+            "  pm.expect(books).to.be.an('array');",
+            "  books.forEach(book => pm.expect(Number(book.category_id)).to.eql(Number(pm.variables.get('categoryId'))));",
+            "});"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "2. 도서 대여",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": {{userId}},\n  \"bookId\": {{bookId}}\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/rentals",
+          "host": ["{{baseUrl}}"],
+          "path": ["rentals"]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.collectionVariables.set('rentalId', '');"]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('201 Created', () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) {",
+              "  const body = pm.response.json();",
+              "  pm.test('생성된 rentalId 반환', () => pm.expect(body.rentalId).to.be.a('number').and.above(0));",
+              "  pm.collectionVariables.set('rentalId', String(body.rentalId));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. 도서 반납",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/rentals/{{rentalId}}/return",
+          "host": ["{{baseUrl}}"],
+          "path": ["rentals", "{{rentalId}}", "return"]
+        }
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('200 OK', () => pm.response.to.have.status(200));",
+            "pm.test('요청한 대여 기록 반납', () => {",
+            "  pm.expect(pm.response.json().rentalId).to.eql(Number(pm.variables.get('rentalId')));",
+            "});"
+          ]
+        }
+      }]
+    }
+  ]
+}
