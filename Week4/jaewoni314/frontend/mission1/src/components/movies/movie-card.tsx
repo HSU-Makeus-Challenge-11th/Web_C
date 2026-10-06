@@ -1,13 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import type { Movie } from "../../types/movie";
-import { cn } from "../../utils/cn";
+import { BookmarkButton } from "./bookmark-button";
 
 interface MovieCardProps {
   movie: Movie;
-  onToggleBookmark: (movieId: number) => void;
 }
 
-export function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
+export function MovieCard({ movie }: MovieCardProps) {
   return (
     <li>
       <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-surface">
@@ -20,28 +19,11 @@ export function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
           />
         </Link>
 
-        <button
-          type="button"
-          className={cn(
-            "absolute right-2 top-2 grid size-9 place-items-center rounded-full bg-black/55 hover:bg-black/75",
-            movie.isBookmarked ? "text-accent" : "text-white",
-          )}
-          aria-pressed={movie.isBookmarked}
-          aria-label={
-            movie.isBookmarked
-              ? `${movie.title} 북마크 해제`
-              : `${movie.title} 북마크 추가`
-          }
-          onClick={() => onToggleBookmark(movie.id)}
-        >
-          <span
-            className={cn(
-              "size-[22px]",
-              movie.isBookmarked ? "icon icon--bookmark" : "icon icon--bookmark-outline",
-            )}
-            aria-hidden="true"
-          />
-        </button>
+        <BookmarkButton
+          movieId={movie.id}
+          movieTitle={movie.title}
+          className="absolute right-2 top-2 size-9 justify-center rounded-full bg-black/55 hover:bg-black/75"
+        />
       </div>
 
       <div className="pt-3">

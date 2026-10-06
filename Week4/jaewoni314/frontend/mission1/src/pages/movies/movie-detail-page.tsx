@@ -1,4 +1,5 @@
 import { Link, useParams } from "@tanstack/react-router";
+import { BookmarkButton } from "../../components/movies/bookmark-button";
 import { movies } from "../../data/movies";
 
 export function MovieDetailPage() {
@@ -43,6 +44,12 @@ export function MovieDetailPage() {
             <p className="text-[15px] text-muted">
               {movie.releaseDate} · {movie.genres.join(" · ")} · {movie.runtime}
             </p>
+            <BookmarkButton
+              movieId={movie.id}
+              movieTitle={movie.title}
+              showLabel
+              className="mt-3 self-start rounded-lg border border-line px-4 py-2 hover:bg-surface"
+            />
             <h2 className="mt-4 text-lg font-semibold text-accent">{movie.tagline}</h2>
             <p className="mt-1 max-w-[760px] leading-[1.7]">{movie.overview}</p>
           </div>
