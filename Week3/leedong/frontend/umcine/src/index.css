@@ -20,3 +20,34 @@ button {
   cursor: pointer;
 } */
 @import "tailwindcss";
+
+/* 아이콘 (svg 모양을 마스크로 쓰고 글자색으로 칠해요) */
+.icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-color: currentColor;
+  -webkit-mask: center / contain no-repeat;
+  mask: center / contain no-repeat;
+}
+
+.icon-movie {
+  -webkit-mask-image: url("/icons/movie.svg");
+  mask-image: url("/icons/movie.svg");
+  color: #17191e;
+}
+
+.icon-search {
+  -webkit-mask-image: url("/icons/search.svg");
+  mask-image: url("/icons/search.svg");
+}
+
+.icon-chevron-left {
+  -webkit-mask-image: url("/icons/chevron-left.svg");
+  mask-image: url("/icons/chevron-left.svg");
+}
+
+.icon-chevron-right {
+  -webkit-mask-image: url("/icons/chevron-right.svg");
+  mask-image: url("/icons/chevron-right.svg");
+}
