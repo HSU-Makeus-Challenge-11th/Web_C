@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import type { Movie } from "../../types/movie";
 
 interface MovieCardProps {
@@ -9,11 +10,17 @@ function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
   return (
     <article className="flex w-full min-w-0 flex-col gap-1">
       <div className="relative aspect-[240/274] w-full overflow-hidden rounded-lg bg-[#f6f7f9]">
-        <img
-          className="size-full object-cover"
-          src={movie.posterPath}
-          alt={movie.title}
-        />
+        <Link
+          to="/movies/$movieId"
+          params={{ movieId: String(movie.id) }}
+          className="absolute inset-0"
+        >
+          <img
+            className="size-full object-cover"
+            src={movie.posterPath}
+            alt={movie.title}
+          />
+        </Link>
 
         <button
           className={`absolute top-2.5 right-2.5 z-10 flex size-[34px] cursor-pointer items-center justify-between rounded-lg border p-0 ${
@@ -36,11 +43,18 @@ function MovieCard({ movie, onToggleBookmark }: MovieCardProps) {
           />
         </button>
       </div>
-
-      <h3 className="truncate pt-1 text-sm font-extrabold text-[#17191e]">
-        {movie.title}
-      </h3>
-      <p className="text-xs font-normal text-[#969da8]">{movie.releaseDate}</p>
+      <Link
+        to="/movies/$movieId"
+        params={{ movieId: String(movie.id) }}
+        className="block"
+      >
+        <h3 className="truncate pt-1 text-sm font-extrabold text-[#17191e]">
+          {movie.title}
+        </h3>
+        <p className="text-xs font-normal text-[#969da8]">
+          {movie.releaseDate}
+        </p>
+      </Link>
     </article>
   );
 }
