@@ -52,10 +52,19 @@ export function Header() {
               )}
             </Link>
 
-            <Link to="/">
-              <span className="inline-block border-b-2 border-transparent py-2 text-sm font-semibold text-[#7b818b]">
-                내 정보
-              </span>
+            <Link to="/my">
+              {({ isActive }) => (
+                <span
+                  className={cn(
+                    "inline-block border-b-2 py-2 text-sm font-semibold",
+                    isActive
+                      ? "border-gray-900 text-gray-900"
+                      : "border-transparent text-[#7b818b]"
+                  )}
+                >
+                  내 정보
+                </span>
+              )}
             </Link>
           </nav>
         </div>
