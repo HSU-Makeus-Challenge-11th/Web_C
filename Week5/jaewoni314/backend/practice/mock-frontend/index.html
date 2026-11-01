@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><title>mock-frontend</title></head>
+<body>
+  <h1>CORS 확인용 간이 프론트</h1>
+  <button id="check">닉네임 중복 체크 (noco)</button>
+  <pre id="result">버튼을 눌러 주세요.</pre>
+  <script>
+    document.getElementById("check").addEventListener("click", async () => {
+      const result = document.getElementById("result");
+      try {
+        const response = await fetch("http://localhost:3000/members/nickname/noco");
+        result.textContent = JSON.stringify(await response.json());
+      } catch (error) {
+        result.textContent = "요청 실패: " + error;
+      }
+    });
+  </script>
+</body>
+</html>
