@@ -18,6 +18,12 @@ interface RatingWithTitle extends RatingResponse {
   movieTitle: string | null;
 }
 
+// 중복 확인 결과를 어떤 입력값을 검사한 결과인지와 함께 저장해요.
+interface DuplicateCheckResult {
+  value: string;
+  state: RequestState<boolean>;
+}
+
 // 서버가 응답한 오류인지, 응답 자체를 받지 못했는지(서버 꺼짐, CORS) 구분해요.
 function getRequestErrorMessage(error: unknown) {
   if (isHTTPError(error)) {
@@ -62,20 +68,29 @@ function DuplicateCheckSection({
   request: (value: string) => Promise<{ available: boolean }>;
 }) {
   const [value, setValue] = useState("");
-  const [state, setState] = useState<RequestState<boolean>>({ status: "idle" });
+  const [result, setResult] = useState<DuplicateCheckResult | null>(null);
+
+  const trimmedValue = value.trim();
+  // 검사한 입력값이 현재 입력과 다르면 이전 입력의 결과는 보여 주지 않아요.
+  const state: RequestState<boolean> =
+    result?.value === trimmedValue ? result.state : { status: "idle" };
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    const trimmedValue = value.trim();
     if (!trimmedValue) return;
 
-    setState({ status: "loading" });
+    setResult({ value: trimmedValue, state: { status: "loading" } });
+    let nextState: RequestState<boolean>;
     try {
       const response = await request(trimmedValue);
-      setState({ status: "success", data: response.available });
+      nextState = { status: "success", data: response.available };
     } catch (error) {
-      setState({ status: "error", message: getRequestErrorMessage(error) });
+      nextState = { status: "error", message: getRequestErrorMessage(error) };
     }
+    // 응답을 기다리는 사이 다른 값을 검사했다면, 늦게 도착한 이 응답이 최신 결과를 덮어쓰지 않게 해요.
+    setResult((prev) =>
+      prev?.value === trimmedValue ? { value: trimmedValue, state: nextState } : prev,
+    );
   }
 
   return (

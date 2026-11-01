@@ -17,7 +17,8 @@ export function Header() {
         <nav className="flex gap-6" aria-label="주요 메뉴">
           <Link
             to="/"
-            activeOptions={{ exact: true }}
+            // ?page=3처럼 페이지 번호가 붙어도 영화 메뉴를 선택된 상태로 보여 줘요.
+            activeOptions={{ exact: true, includeSearch: false }}
             className={navLinkClass}
             activeProps={{ className: "text-text font-semibold" }}
           >

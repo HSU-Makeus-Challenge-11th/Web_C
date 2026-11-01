@@ -1,3 +1,4 @@
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { getMovies } from "../../api/movies/get-movies";
 import type { TmdbMovieListItem } from "../../api/movies/models";
@@ -12,7 +13,8 @@ import {
   type CardSize,
 } from "../../utils/view-setting-storage";
 
-const TOTAL_PAGES = 5;
+// TMDB API는 500페이지까지만 요청할 수 있어서, 응답의 total_pages가 더 커도 500페이지까지만 이동해요.
+const MAX_TMDB_PAGE = 500;
 
 const cardSizeLabels: Record<CardSize, string> = {
   large: "크게",
@@ -20,11 +22,15 @@ const cardSizeLabels: Record<CardSize, string> = {
 };
 
 export function MovieListPage() {
-  const [currentPage, setCurrentPage] = useState(1);
+  // 페이지 번호를 URL에 두어 상세 화면에서 돌아오거나 새로고침해도 보던 페이지를 유지해요.
+  const { page: currentPage = 1 } = useSearch({ from: "/" });
+  const navigate = useNavigate({ from: "/" });
   // 초기값 함수로 넘겨 첫 렌더링에서 한 번만 저장값을 읽어요.
   const [cardSize, setCardSize] = useState(readCardSize);
 
   const [movies, setMovies] = useState<TmdbMovieListItem[]>([]);
+  // 첫 응답을 받기 전에는 전체 페이지 수를 몰라서 0으로 두고 페이지 이동을 숨겨요.
+  const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -37,7 +43,10 @@ export function MovieListPage() {
 
       try {
         const response = await getMovies({ page: currentPage });
-        if (!ignore) setMovies(response.results);
+        if (!ignore) {
+          setMovies(response.results);
+          setTotalPages(Math.min(response.total_pages, MAX_TMDB_PAGE));
+        }
       } catch {
         if (!ignore) setErrorMessage("영화 목록을 불러오지 못했어요.");
       } finally {
@@ -52,6 +61,10 @@ export function MovieListPage() {
       ignore = true;
     };
   }, [currentPage]);
+
+  function handlePageChange(page: number) {
+    navigate({ search: page === 1 ? {} : { page } });
+  }
 
   function handleChangeCardSize(nextCardSize: CardSize) {
     setCardSize(nextCardSize);
@@ -95,11 +108,13 @@ export function MovieListPage() {
         <MovieGrid movies={movies} cardSize={cardSize} />
       )}
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={TOTAL_PAGES}
-        onPageChange={setCurrentPage}
-      />
+      {totalPages > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
     </main>
   );
 }
