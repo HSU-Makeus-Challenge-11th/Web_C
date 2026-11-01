@@ -1,7 +1,7 @@
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { getMovies } from "../../api/movies/get-movies";
-import type { TmdbMovieListItem } from "../../api/movies/models";
+import { useState } from "react";
+import { movieQueries } from "../../api/movies/movie-queries";
 import { MovieGrid } from "../../components/movies/movie-grid";
 import { Pagination } from "../../components/movies/pagination";
 import { StatusMessage } from "../../components/movies/status-message";
@@ -28,39 +28,18 @@ export function MovieListPage() {
   // 초기값 함수로 넘겨 첫 렌더링에서 한 번만 저장값을 읽어요.
   const [cardSize, setCardSize] = useState(readCardSize);
 
-  const [movies, setMovies] = useState<TmdbMovieListItem[]>([]);
-  // 첫 응답을 받기 전에는 전체 페이지 수를 몰라서 0으로 두고 페이지 이동을 숨겨요.
-  const [totalPages, setTotalPages] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const moviesQuery = useQuery({
+    // key에 page가 들어 있어 페이지마다 캐시를 따로 저장해요.
+    ...movieQueries.list(currentPage),
+    // 새 페이지를 불러오는 동안 이전 페이지 응답을 placeholder로 남겨 두어, 페이지 이동 버튼이 사라지지 않게 해요.
+    placeholderData: keepPreviousData,
+  });
 
-  useEffect(() => {
-    let ignore = false;
-
-    async function loadMovies() {
-      setIsLoading(true);
-      setErrorMessage(null);
-
-      try {
-        const response = await getMovies({ page: currentPage });
-        if (!ignore) {
-          setMovies(response.results);
-          setTotalPages(Math.min(response.total_pages, MAX_TMDB_PAGE));
-        }
-      } catch {
-        if (!ignore) setErrorMessage("영화 목록을 불러오지 못했어요.");
-      } finally {
-        if (!ignore) setIsLoading(false);
-      }
-    }
-
-    loadMovies();
-
-    // 페이지를 빠르게 바꾸면 이전 요청의 결과가 현재 화면을 덮어쓰지 않게 해요.
-    return () => {
-      ignore = true;
-    };
-  }, [currentPage]);
+  const movies = moviesQuery.data?.results ?? [];
+  // 첫 응답을 받기 전에는 전체 페이지 수를 몰라서 0이 되고, 페이지 이동을 숨겨요.
+  const totalPages = Math.min(moviesQuery.data?.total_pages ?? 0, MAX_TMDB_PAGE);
+  // placeholder는 이전 페이지의 영화라서, 현재 페이지 응답이 올 때까지 목록 대신 로딩 문구를 보여 줘요.
+  const isLoadingPage = moviesQuery.isPending || moviesQuery.isPlaceholderData;
 
   function handlePageChange(page: number) {
     navigate({ search: page === 1 ? {} : { page } });
@@ -100,10 +79,10 @@ export function MovieListPage() {
         </div>
       </div>
 
-      {isLoading ? (
+      {isLoadingPage ? (
         <StatusMessage>영화 목록을 불러오는 중이에요.</StatusMessage>
-      ) : errorMessage ? (
-        <StatusMessage isError>{errorMessage}</StatusMessage>
+      ) : moviesQuery.isError ? (
+        <StatusMessage isError>영화 목록을 불러오지 못했어요.</StatusMessage>
       ) : (
         <MovieGrid movies={movies} cardSize={cardSize} />
       )}

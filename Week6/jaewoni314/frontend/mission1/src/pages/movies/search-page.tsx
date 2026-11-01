@@ -1,17 +1,11 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useState, type SubmitEvent } from "react";
-import type { TmdbMovieListItem } from "../../api/movies/models";
-import { searchMovies } from "../../api/movies/search-movies";
+import { useState, type SubmitEvent } from "react";
+import { movieQueries } from "../../api/movies/movie-queries";
 import { BookmarkButton } from "../../components/movies/bookmark-button";
 import { MovieImage } from "../../components/movies/movie-image";
 import { StatusMessage } from "../../components/movies/status-message";
 import { getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
-
-interface SearchResult {
-  query: string;
-  movies: TmdbMovieListItem[];
-  errorMessage: string | null;
-}
 
 export function SearchPage() {
   const { query = "" } = useSearch({ from: "/search" });
@@ -25,43 +19,16 @@ export function SearchPage() {
     setSearchText(query);
   }
 
-  // 응답을 어떤 검색어의 결과인지와 함께 저장해요.
-  const [result, setResult] = useState<SearchResult | null>(null);
-
   const normalizedQuery = query.trim();
 
-  useEffect(() => {
+  const searchQuery = useQuery({
+    // key에 검색어가 들어 있어 검색어마다 결과를 따로 캐시해요.
+    ...movieQueries.search(normalizedQuery),
     // 빈 검색어는 요청하지 않고 안내 문구만 보여 줘요.
-    if (!normalizedQuery) return;
+    enabled: normalizedQuery.length > 0,
+  });
 
-    let ignore = false;
-
-    searchMovies({ query: normalizedQuery })
-      .then((response) => {
-        if (!ignore) {
-          setResult({ query: normalizedQuery, movies: response.results, errorMessage: null });
-        }
-      })
-      .catch(() => {
-        if (!ignore) {
-          setResult({
-            query: normalizedQuery,
-            movies: [],
-            errorMessage: "검색 결과를 불러오지 못했어요.",
-          });
-        }
-      });
-
-    // 검색어가 바뀌면 늦게 도착한 이전 응답이 현재 결과를 덮어쓰지 않게 해요.
-    return () => {
-      ignore = true;
-    };
-  }, [normalizedQuery]);
-
-  // 현재 검색어의 응답이 아직 없으면 로딩이에요. 이전 검색어의 결과는 보여 주지 않아요.
-  const isLoading = result?.query !== normalizedQuery;
-  const movies = isLoading ? [] : result.movies;
-  const errorMessage = isLoading ? null : result.errorMessage;
+  const movies = searchQuery.data?.results ?? [];
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -97,15 +64,16 @@ export function SearchPage() {
         <>
           <div className="mt-10 flex items-baseline gap-3">
             <h2 className="text-xl font-bold">‘{normalizedQuery}’ 검색 결과</h2>
-            {!isLoading && !errorMessage && (
+            {searchQuery.isSuccess && (
               <p className="text-[15px] text-muted">영화 {movies.length}편</p>
             )}
           </div>
 
-          {isLoading ? (
+          {/* 조건에 따라 요청하는 검색은 isLoading으로 실제 첫 요청 중일 때만 로딩을 보여 줘요. */}
+          {searchQuery.isLoading ? (
             <StatusMessage>검색 결과를 불러오는 중이에요.</StatusMessage>
-          ) : errorMessage ? (
-            <StatusMessage isError>{errorMessage}</StatusMessage>
+          ) : searchQuery.isError ? (
+            <StatusMessage isError>검색 결과를 불러오지 못했어요.</StatusMessage>
           ) : movies.length === 0 ? (
             <StatusMessage>조건에 맞는 영화가 없어요.</StatusMessage>
           ) : (
