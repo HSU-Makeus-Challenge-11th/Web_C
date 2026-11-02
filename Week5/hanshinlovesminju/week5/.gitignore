@@ -1,0 +1,56 @@
+# ==========================================
+# UMC 11th Web Project .gitignore
+# ==========================================
+
+# 📦 dependencies
+# (매주 각 주차별 폴더 내부에 설치되는 모듈들을 모두 무시합니다)
+node_modules/
+**/node_modules/
+
+# 🔐 env (보안이 필요한 환경변수 파일 무시)
+.env
+.env.*
+!.env.example
+
+# 📝 logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 🏗️ build output
+dist/
+build/
+coverage/
+
+# 💻 OS files (맥/윈도우 운영체제 임시 파일)
+.DS_Store
+Thumbs.db
+
+# 🛠️ IDE / Editor
+# (VS Code 및 JetBrains(WebStorm) 개인 설정 무시)
+.vscode/*
+!.vscode/settings.json
+.idea/
+
+# ⚙️ runtime files
+*.pid
+*.seed
+*.pid.lock
+
+# 🗑️ temporary files
+tmp/
+temp/
+
+# 📦 package manager cache
+.npm/
+.pnpm-store/
+
+# 🧪 testing
+.nyc_output/
+
+# 🗃️ misc
+*.local
+.pub
