@@ -20,8 +20,9 @@ export class MemberService {
   ) {}
 
   async checkNickname(nickname: string): Promise<CheckResponseDto> {
+    // 회원가입과 내 정보 수정처럼 앞뒤 공백을 지운 값으로 찾아야, 중복 체크 결과와 실제 가입 결과가 같아요.
     const exists = await this.memberRepository.exists({
-      where: { nickname },
+      where: { nickname: nickname.trim() },
     });
     return { available: !exists };
   }
