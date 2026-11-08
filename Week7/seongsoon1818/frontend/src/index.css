@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans:
+    Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Noto Sans KR", sans-serif;
+
+  --color-brand: #2f80ed;
+}
+
+@layer base {
+  html {
+    @apply min-h-full min-w-80 scroll-smooth;
+  }
+
+  body {
+    @apply m-0 min-h-screen bg-[#f5f6f8] font-sans text-[#171b24] antialiased;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand/60;
+  }
+}
+
+@layer components {
+  .account-label {
+    @apply flex flex-col gap-2 text-sm font-semibold;
+  }
+
+  .account-input {
+    @apply h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-base font-normal placeholder:text-gray-400;
+  }
+
+  .account-primary {
+    @apply inline-flex h-11 cursor-pointer items-center justify-center rounded-md bg-brand px-5 text-sm font-semibold text-white hover:bg-[#226fd1] disabled:cursor-default disabled:opacity-50;
+  }
+}
