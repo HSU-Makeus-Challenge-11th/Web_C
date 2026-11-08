@@ -10,8 +10,7 @@ import { MemberInfoResponseDto } from "../dto/member-info-response.dto.js";
 import { MemberUpdateRequestDto } from "../dto/member-update-request.dto.js";
 import { ApiException } from "../common/api.exception.js";
 import { ErrorCodes } from "../common/error-code.js";
-
-const BCRYPT_SALT_ROUNDS = 10;
+import { BCRYPT_SALT_ROUNDS } from "../common/password.js";
 
 @Injectable()
 export class MemberService {
