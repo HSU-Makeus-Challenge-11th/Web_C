@@ -1,5 +1,5 @@
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, type SubmitEvent } from "react";
-// import { useNavigate } from "@tanstack/react-router";
 import { checkEmail } from "../../api/members/check-email";
 import { checkNickname } from "../../api/members/check-nickname";
 import { signup } from "../../api/members/signup";
@@ -35,7 +35,7 @@ export function SignupPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const emailCheck = useDuplicateCheck(checkEmail, "이메일");
   const nicknameCheck = useDuplicateCheck(checkNickname, "닉네임");
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const email = form.email.trim();
   const nickname = form.nickname.trim();
@@ -99,8 +99,7 @@ export function SignupPage() {
     try {
       const response = await signup({ email, nickname, password: form.password });
       alert(response.message);
-      // 로그인 페이지를 만든 뒤 주석 해제
-      // navigate({ to: "/login" });
+      navigate({ to: "/login" });
     } catch (error) {
       // 실패하면 입력값을 그대로 두어 다시 요청할 수 있어요.
       alert(getApiErrorMessage(error, "회원가입에 실패했어요. 다시 시도해 주세요."));
@@ -110,7 +109,18 @@ export function SignupPage() {
   };
 
   return (
-    <AuthLayout title="회원가입" description="UMCine에서 보고 싶은 영화를 기록해 보세요.">
+    <AuthLayout
+      title="회원가입"
+      description="UMCine에서 보고 싶은 영화를 기록해 보세요."
+      footer={
+        <>
+          이미 계정이 있나요?{" "}
+          <Link to="/login" className="font-semibold text-accent hover:underline">
+            로그인
+          </Link>
+        </>
+      }
+    >
       {/* noValidate는 폼 제출 시 브라우저의 기본 유효성 검사를 꺼요. */}
       <form className="flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
         <FormField

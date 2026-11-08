@@ -49,4 +49,5 @@
   .icon--chevron-right { --icon: url("/icons/chevron-right.svg"); }
   .icon--mail { --icon: url("/icons/mail.svg"); }
   .icon--lock { --icon: url("/icons/lock.svg"); }
+  .icon--edit { --icon: url("/icons/edit.svg"); }
 }

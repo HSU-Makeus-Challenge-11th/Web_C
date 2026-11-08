@@ -33,18 +33,28 @@ export function Header() {
           </Link>
         </nav>
 
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex items-center gap-2">
           <Link
             to="/search"
-            className="grid size-10 place-items-center rounded-full text-muted hover:bg-surface hover:text-text"
+            // 좁은 화면에서는 메뉴의 "검색"으로 대신해요.
+            className="hidden size-10 place-items-center rounded-full text-muted hover:bg-surface hover:text-text sm:grid"
             aria-label="영화 검색"
           >
             <span className="icon icon--search" aria-hidden="true" />
           </Link>
+          {/* 8주차에 로그인 상태를 관리하면, 로그인 전에는 "로그인"을, 로그인 후에는 내 정보 아이콘을 보여 줄 예정이에요. */}
           <Link
-            to="/members"
+            to="/login"
+            className={`px-2 ${navLinkClass}`}
+            activeProps={{ className: "text-text font-semibold" }}
+          >
+            로그인
+          </Link>
+          <Link
+            to="/my"
             className="grid size-10 place-items-center rounded-full text-muted hover:bg-surface hover:text-text"
-            aria-label="회원 API 확인"
+            activeProps={{ className: "text-text" }}
+            aria-label="내 정보"
           >
             <span className="icon icon--person" aria-hidden="true" />
           </Link>
