@@ -17,7 +17,7 @@ import { RatingService } from "./service/rating.service.js";
     TypeOrmModule.forRoot({
       type: "mysql",
       host: process.env.DB_HOST,
-      port: 3306,
+      port: Number(process.env.DB_PORT || 3306), // .env의 DB_PORT를 쓰고, 비어 있으면 MySQL 기본 포트를 써요.
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
