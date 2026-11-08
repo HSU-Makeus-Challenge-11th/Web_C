@@ -1,0 +1,177 @@
+const { test, before, after, beforeEach, mock } = require('node:test');
+const assert = require('node:assert/strict');
+const request = require('supertest');
+const { Test } = require('@nestjs/testing');
+const { JwtService } = require('@nestjs/jwt');
+const { getRepositoryToken } = require('@nestjs/typeorm');
+const { MemberController } = require('../dist/controller/member.controller');
+const { RatingController } = require('../dist/controller/rating.controller');
+const { MemberService } = require('../dist/service/member.service');
+const { RatingService } = require('../dist/service/rating.service');
+const { Member } = require('../dist/entity/member.entity');
+const { Rating } = require('../dist/entity/rating.entity');
+const { configureApp } = require('../dist/configure-app');
+const { ApiException } = require('../dist/exception/api.exception');
+
+const ratings = Array.from({ length: 23 }, (_, index) => ({
+  ratingId: 23 - index, movieId: 100 + index, score: 4,
+  comment: null, createdAt: new Date('2026-10-10'), updatedAt: new Date('2026-10-10'),
+  member: { memberId: 1, password: 'not-for-the-response' },
+}));
+const members = {
+  exists: mock.fn(async ({ where }) => where.nickname === 'taken' || where.email === 'taken@example.com'),
+  findOneBy: mock.fn(async ({ memberId }) => [1, 2].includes(memberId) ? { memberId } : null),
+};
+const ratingRepository = {
+  findAndCount: mock.fn(async ({ where, skip, take, order }) => {
+    assert.deepEqual(order, { ratingId: 'DESC' });
+    const source = where.member.memberId === 1 ? ratings : [];
+    return [source.slice(skip, skip + take), source.length];
+  }),
+};
+async function createApp(origin, guard) {
+  const module = await Test.createTestingModule({
+    controllers: [MemberController, RatingController],
+    providers: [MemberService, RatingService,
+      { provide: getRepositoryToken(Member), useValue: members },
+      { provide: getRepositoryToken(Rating), useValue: ratingRepository },
+    ],
+  }).compile();
+  const app = module.createNestApplication({ logger: false });
+  if (guard) app.useGlobalGuards(guard);
+  configureApp(app, origin);
+  await app.init();
+  return app;
+}
+let app;
+before(async () => { app = await createApp('http://localhost:5173'); });
+after(async () => { await app?.close(); });
+beforeEach(() => {
+  members.exists.mock.resetCalls();
+  members.findOneBy.mock.resetCalls();
+  ratingRepository.findAndCount.mock.resetCalls();
+});
+
+test('nickname boundaries and email availability', async () => {
+  for (const nickname of ['ab', 'abcdefghijkl', '가나다']) {
+    await request(app.getHttpServer()).get(`/members/nickname/${encodeURIComponent(nickname)}`)
+      .expect(200, { available: true });
+  }
+  await request(app.getHttpServer()).get('/members/nickname/taken').expect(200, { available: false });
+  await request(app.getHttpServer()).get('/members/email/new%40example.com').expect(200, { available: true });
+  await request(app.getHttpServer()).get('/members/email/taken%40example.com').expect(200, { available: false });
+});
+
+test('invalid nickname/email returns 400 before any availability query', async () => {
+  for (const url of ['/members/nickname/a', '/members/nickname/abcdefghijklm',
+    '/members/email/not-an-email', '/members/email/a%40', '/members/email/a%20b%40example.com']) {
+    const response = await request(app.getHttpServer()).get(url).expect(400);
+    assert.equal(response.body.isSuccess, false);
+    assert.equal(response.body.code, 'COMMON400');
+    assert.equal(response.body.result, null);
+    assert.ok(response.body.message.length);
+  }
+  assert.equal(members.exists.mock.callCount(), 0);
+});
+
+test('global filter formats custom and JWT verification errors from a guard', async (t) => {
+  const jwt = new JwtService({ secret: 'filter-test-secret' });
+  const guardedApp = await createApp('http://localhost:5173', {
+    async canActivate(context) {
+      const header = context.switchToHttp().getRequest().headers.authorization;
+      if (!header) throw new ApiException(401, 'AUTH_TOKEN_REQUIRED', '토큰이 필요합니다.');
+      await jwt.verifyAsync(header.slice('Bearer '.length));
+      return true;
+    },
+  });
+  t.after(() => guardedApp.close());
+  const getNickname = () => request(guardedApp.getHttpServer()).get('/members/nickname/demo');
+  await getNickname().expect(401, {
+    isSuccess: false, code: 'AUTH_TOKEN_REQUIRED', message: '토큰이 필요합니다.', result: null,
+  });
+  for (const [token, code, message] of [
+    [jwt.sign({ sub: '1' }, { expiresIn: -1 }), 'AUTH_TOKEN_EXPIRED', '토큰이 만료되었습니다.'],
+    [jwt.sign({ sub: '1' }, { secret: 'wrong-signature' }), 'AUTH_TOKEN_INVALID', '유효하지 않은 토큰입니다.'],
+    ['malformed', 'AUTH_TOKEN_INVALID', '유효하지 않은 토큰입니다.'],
+  ]) {
+    await getNickname().set('Authorization', `Bearer ${token}`).expect(401, {
+      isSuccess: false, code, message, result: null,
+    });
+  }
+  await getNickname().set('Authorization', `Bearer ${jwt.sign({ sub: '1' })}`).expect(200);
+});
+
+test('pagination defaults, next page, final page, and DTO privacy', async () => {
+  const first = (await request(app.getHttpServer()).get('/members/1/ratings').expect(200)).body;
+  assert.equal(first.items.length, 10);
+  assert.deepEqual([first.page, first.size, first.totalItems, first.totalPages, first.hasNext, first.hasPrevious],
+    [0, 10, 23, 3, true, false]);
+  assert.equal(first.items[0].ratingId, 23);
+  assert.equal('member' in first.items[0], false);
+  const second = (await request(app.getHttpServer()).get('/members/1/ratings?page=1&size=10').expect(200)).body;
+  assert.equal(second.items[0].ratingId, 13);
+  assert.ok(first.items.every((a) => second.items.every((b) => a.ratingId !== b.ratingId)));
+  const last = (await request(app.getHttpServer()).get('/members/1/ratings?page=2&size=10').expect(200)).body;
+  assert.deepEqual([last.items.length, last.hasNext, last.hasPrevious], [3, false, true]);
+});
+
+test('empty member ratings and out-of-range pages return an empty list', async () => {
+  const empty = (await request(app.getHttpServer()).get('/members/2/ratings').expect(200)).body;
+  assert.deepEqual([empty.items, empty.totalItems, empty.totalPages, empty.hasNext], [[], 0, 0, false]);
+  const past = (await request(app.getHttpServer()).get('/members/1/ratings?page=99&size=10').expect(200)).body;
+  assert.deepEqual([past.items, past.totalItems, past.hasNext], [[], 23, false]);
+});
+
+test('invalid pagination is rejected before database queries', async () => {
+  for (const query of ['page=-1', 'page=1.5', 'page=no', 'page=', 'page=0&page=1',
+    'size=0', 'size=101', 'size=-1', 'size=1.5', 'size=', 'size=1e1',
+    'page=9007199254740992', 'page=9007199254740991&size=100']) {
+    await request(app.getHttpServer()).get(`/members/1/ratings?${query}`).expect(400);
+  }
+  assert.equal(members.findOneBy.mock.callCount(), 0);
+  assert.equal(ratingRepository.findAndCount.mock.callCount(), 0);
+});
+
+test('missing member returns 404; malformed member ID returns 400', async () => {
+  await request(app.getHttpServer()).get('/members/999/ratings').expect(404);
+  await request(app.getHttpServer()).get('/members/abc/ratings').expect(400);
+  assert.equal(ratingRepository.findAndCount.mock.callCount(), 0);
+});
+
+test('CORS permits the exact origin and omits permission for other origins', async () => {
+  const allowed = await request(app.getHttpServer()).get('/members/nickname/demo')
+    .set('Origin', 'http://localhost:5173').expect(200);
+  assert.equal(allowed.headers['access-control-allow-origin'], 'http://localhost:5173');
+  for (const origin of ['http://127.0.0.1:5173', 'http://localhost:5174', 'https://localhost:5173']) {
+    const denied = await request(app.getHttpServer()).get('/members/nickname/demo').set('Origin', origin).expect(200);
+    assert.equal(denied.headers['access-control-allow-origin'], undefined);
+  }
+  const invalid = await request(app.getHttpServer()).get('/members/nickname/x')
+    .set('Origin', 'http://localhost:5173').expect(400);
+  assert.equal(invalid.headers['access-control-allow-origin'], 'http://localhost:5173');
+  for (const [method, path] of [
+    ['GET', '/members/1/ratings'],
+    ['POST', '/members'],
+    ['POST', '/members/1/ratings'],
+    ['PATCH', '/members/1/ratings/41'],
+    ['DELETE', '/members/1/ratings/41'],
+  ]) {
+    const preflight = await request(app.getHttpServer()).options(path)
+      .set('Origin', 'http://localhost:5173')
+      .set('Access-Control-Request-Method', method)
+      .set('Access-Control-Request-Headers', 'content-type').expect(204);
+    assert.equal(preflight.headers['access-control-allow-origin'], 'http://localhost:5173');
+    assert.ok(preflight.headers['access-control-allow-methods'].split(',').includes(method));
+    assert.equal(preflight.headers['access-control-allow-headers'], 'content-type');
+  }
+});
+
+test('wildcard CORS grants browser read access to any origin without credentials', async () => {
+  const wildcard = await createApp('*');
+  try {
+    const response = await request(wildcard.getHttpServer()).get('/members/nickname/demo')
+      .set('Origin', 'http://127.0.0.1:5173').expect(200);
+    assert.equal(response.headers['access-control-allow-origin'], '*');
+    assert.equal(response.headers['access-control-allow-credentials'], undefined);
+  } finally { await wildcard.close(); }
+});
