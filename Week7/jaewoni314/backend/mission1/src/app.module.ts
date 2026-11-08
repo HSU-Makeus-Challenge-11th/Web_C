@@ -29,7 +29,8 @@ import { RatingService } from "./service/rating.service.js";
       global: true, // 전역으로 등록해서 어느 서비스나 Guard에서든 JwtService를 주입받을 수 있어요.
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        // 비밀키가 비어 있거나 짧으면 추측해서 토큰을 위조할 수 있어서, 로그인할 때가 아니라 서버를 켤 때 바로 막아요.
+        // 짧은 비밀키는 추측해서 토큰을 위조할 수 있고, 빈 비밀키로는 토큰을 만들지 못해 로그인할 때마다 500이 나요.
+        // 둘 다 로그인할 때가 아니라 서버를 켤 때 바로 막아요.
         const secret = configService.get<string>("JWT_SECRET") ?? "";
         if (secret.length < 32) {
           throw new Error("JWT_SECRET을 32자 이상으로 .env에 넣어 주세요.");
