@@ -1,11 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import bcrypt from "bcrypt";
-import { Repository } from "typeorm";
+import { Not, Repository } from "typeorm";
 import { Member } from "../entity/member.entity.js";
 import { CheckResponseDto } from "../dto/check-response.dto.js";
 import { CreateMemberDto } from "../dto/create-member.dto.js";
 import { MemberResponseDto } from "../dto/member-response.dto.js";
+import { MemberInfoResponseDto } from "../dto/member-info-response.dto.js";
+import { MemberUpdateRequestDto } from "../dto/member-update-request.dto.js";
 import { ApiException } from "../common/api.exception.js";
 import { ErrorCodes } from "../common/error-code.js";
 
@@ -49,5 +51,36 @@ export class MemberService {
     );
 
     return MemberResponseDto.from(savedMember);
+  }
+
+  async getMyInfo(memberId: number): Promise<MemberInfoResponseDto> {
+    const member = await this.findMember(memberId);
+    return MemberInfoResponseDto.from(member);
+  }
+
+  async updateMyInfo(memberId: number, dto: MemberUpdateRequestDto): Promise<MemberInfoResponseDto> {
+    const member = await this.findMember(memberId);
+
+    // 나를 뺀 다른 회원이 그 닉네임을 쓰고 있을 때만 막아요. 지금 내 닉네임을 그대로 보내도 통과해요.
+    // DB에도 UNIQUE 제약이 있지만, 제약 위반 오류 대신 정해 둔 응답을 주려고 먼저 확인해요.
+    const isDuplicated = await this.memberRepository.exists({
+      where: { nickname: dto.nickname, memberId: Not(memberId) },
+    });
+    if (isDuplicated) {
+      throw new ApiException(ErrorCodes.MEMBER_NICKNAME_DUPLICATED);
+    }
+
+    member.nickname = dto.nickname;
+    const savedMember = await this.memberRepository.save(member);
+
+    return MemberInfoResponseDto.from(savedMember);
+  }
+
+  private async findMember(memberId: number): Promise<Member> {
+    const member = await this.memberRepository.findOneBy({ memberId });
+    if (!member) {
+      throw new ApiException(ErrorCodes.MEMBER_NOT_FOUND);
+    }
+    return member;
   }
 }

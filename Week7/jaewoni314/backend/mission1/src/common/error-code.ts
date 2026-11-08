@@ -7,8 +7,28 @@ export interface ErrorCode {
 }
 
 // code는 {도메인}{HTTP 상태 코드}_{일련번호} 규칙으로 지어요.
-// 같은 409라도 MEMBER409_1(닉네임)과 MEMBER409_2(이메일)처럼 이유가 code에 드러나서, 화면이 code만 보고 다음 동작을 정할 수 있어요.
+// 같은 401이라도 AUTH401_2(토큰 없음)와 AUTH401_4(토큰 만료)처럼 이유가 code에 드러나서, 화면이 code만 보고 다음 동작을 정할 수 있어요.
 export const ErrorCodes = {
+  AUTH_LOGIN_FAILED: {
+    status: HttpStatus.UNAUTHORIZED,
+    code: "AUTH401_1",
+    message: "이메일 또는 비밀번호가 올바르지 않습니다.",
+  },
+  AUTH_TOKEN_MISSING: {
+    status: HttpStatus.UNAUTHORIZED,
+    code: "AUTH401_2",
+    message: "로그인이 필요한 요청입니다.",
+  },
+  AUTH_TOKEN_INVALID: {
+    status: HttpStatus.UNAUTHORIZED,
+    code: "AUTH401_3",
+    message: "유효하지 않은 토큰입니다.",
+  },
+  AUTH_TOKEN_EXPIRED: {
+    status: HttpStatus.UNAUTHORIZED,
+    code: "AUTH401_4",
+    message: "토큰이 만료되었습니다. 다시 로그인해주세요.",
+  },
   MEMBER_NOT_FOUND: {
     status: HttpStatus.NOT_FOUND,
     code: "MEMBER404_1",

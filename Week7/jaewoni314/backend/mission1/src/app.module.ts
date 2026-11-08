@@ -1,10 +1,13 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { JwtModule } from "@nestjs/jwt";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Member } from "./entity/member.entity.js";
 import { Rating } from "./entity/rating.entity.js";
+import { AuthController } from "./controller/auth.controller.js";
 import { MemberController } from "./controller/member.controller.js";
 import { RatingController } from "./controller/rating.controller.js";
+import { AuthService } from "./service/auth.service.js";
 import { MemberService } from "./service/member.service.js";
 import { RatingService } from "./service/rating.service.js";
 
@@ -22,8 +25,33 @@ import { RatingService } from "./service/rating.service.js";
       synchronize: false,
     }),
     TypeOrmModule.forFeature([Member, Rating]),
+    JwtModule.registerAsync({
+      global: true, // 전역으로 등록해서 어느 서비스나 Guard에서든 JwtService를 주입받을 수 있어요.
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        // 비밀키가 비어 있거나 짧으면 추측해서 토큰을 위조할 수 있어서, 로그인할 때가 아니라 서버를 켤 때 바로 막아요.
+        const secret = configService.get<string>("JWT_SECRET") ?? "";
+        if (secret.length < 32) {
+          throw new Error("JWT_SECRET을 32자 이상으로 .env에 넣어 주세요.");
+        }
+
+        // 환경변수는 문자열로 들어오므로 초 단위 숫자로 바꿔요. 값이 없거나 비어 있으면 3600초(1시간)를 써요.
+        // "1h"처럼 숫자가 아니거나 0 이하이면 토큰을 만들지 못하거나 바로 만료되니, 이것도 서버를 켤 때 막아요.
+        const expiresIn = Number(configService.get<string>("JWT_ACCESS_EXPIRATION") || 3600);
+        if (!Number.isSafeInteger(expiresIn) || expiresIn <= 0) {
+          throw new Error("JWT_ACCESS_EXPIRATION은 초 단위 양의 정수로 넣어 주세요. (예: 3600)");
+        }
+
+        return {
+          secret,
+          signOptions: { expiresIn },
+          // 서명할 때 쓰는 HS256으로 만든 토큰만 받아요.
+          verifyOptions: { algorithms: ["HS256"] },
+        };
+      },
+    }),
   ],
-  controllers: [MemberController, RatingController],
-  providers: [MemberService, RatingService],
+  controllers: [AuthController, MemberController, RatingController],
+  providers: [AuthService, MemberService, RatingService],
 })
 export class AppModule {}
