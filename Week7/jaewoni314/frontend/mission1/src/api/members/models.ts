@@ -1,3 +1,11 @@
+// 6주차 서버의 공통 응답 형식이에요.
+interface ApiResponse<T> {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: T;
+}
+
 interface CheckResponse {
   available: boolean;
 }
@@ -11,4 +19,25 @@ interface RatingResponse {
   updatedAt: string;
 }
 
-export type { CheckResponse, RatingResponse };
+interface SignupRequest {
+  email: string;
+  nickname: string;
+  password: string;
+}
+
+interface SignupResult {
+  memberId: number;
+  email: string;
+  nickname: string;
+}
+
+type SignupResponse = ApiResponse<SignupResult>;
+
+export type {
+  ApiResponse,
+  CheckResponse,
+  RatingResponse,
+  SignupRequest,
+  SignupResponse,
+  SignupResult,
+};

@@ -47,4 +47,6 @@
   .icon--bookmark-outline { --icon: url("/icons/bookmark-outline.svg"); }
   .icon--chevron-left { --icon: url("/icons/chevron-left.svg"); }
   .icon--chevron-right { --icon: url("/icons/chevron-right.svg"); }
+  .icon--mail { --icon: url("/icons/mail.svg"); }
+  .icon--lock { --icon: url("/icons/lock.svg"); }
 }
