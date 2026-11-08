@@ -9,18 +9,17 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Req,
   UseGuards,
 } from "@nestjs/common";
 import { RatingService } from "../service/rating.service.js";
 import { CreateRatingDto } from "../dto/create-rating.dto.js";
 import { UpdateRatingDto } from "../dto/update-rating.dto.js";
 import { ApiResponse } from "../common/api-response.js";
-// AuthenticatedRequest는 데코레이터가 붙은 매개변수의 타입이라 type으로 가져와야 빌드돼요.
-import { AuthGuard, type AuthenticatedRequest } from "../guard/auth.guard.js";
+import { AuthGuard } from "../guard/auth.guard.js";
+import { LoginMember } from "../decorator/login-member.decorator.js";
 
 // 등록/수정/삭제는 /ratings로 옮겨서 경로에 memberId를 받지 않아요.
-// 경로에 남아 있으면 클라이언트가 그 값을 바꿔 보낼 수 있으니, 누구인지는 AuthGuard가 토큰에서 알아내요.
+// 경로에 남아 있으면 클라이언트가 그 값을 바꿔 보낼 수 있으니, 누구인지는 AuthGuard가 토큰에서 알아내고 @LoginMember()로 받아요.
 @Controller()
 export class RatingController {
   constructor(private readonly ratingService: RatingService) {}
@@ -34,9 +33,7 @@ export class RatingController {
   @Post("ratings")
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.CREATED)
-  async create(@Req() request: AuthenticatedRequest, @Body() dto: CreateRatingDto) {
-    const memberId = request.memberId;
-
+  async create(@LoginMember() memberId: number, @Body() dto: CreateRatingDto) {
     const result = await this.ratingService.create(memberId, dto);
     return ApiResponse.success("COMMON201", "평점을 등록했습니다.", result);
   }
@@ -44,12 +41,10 @@ export class RatingController {
   @Patch("ratings/:ratingId")
   @UseGuards(AuthGuard)
   async update(
-    @Req() request: AuthenticatedRequest,
+    @LoginMember() memberId: number,
     @Param("ratingId", ParseIntPipe) ratingId: number,
     @Body() dto: UpdateRatingDto,
   ) {
-    const memberId = request.memberId;
-
     const result = await this.ratingService.update(memberId, ratingId, dto);
     return ApiResponse.success("COMMON200", "평점을 수정했습니다.", result);
   }
@@ -59,9 +54,7 @@ export class RatingController {
   @Delete("ratings/:ratingId")
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
-  async delete(@Req() request: AuthenticatedRequest, @Param("ratingId", ParseIntPipe) ratingId: number) {
-    const memberId = request.memberId;
-
+  async delete(@LoginMember() memberId: number, @Param("ratingId", ParseIntPipe) ratingId: number) {
     await this.ratingService.delete(memberId, ratingId);
     return ApiResponse.success("COMMON200", "평점을 삭제했습니다.", null);
   }

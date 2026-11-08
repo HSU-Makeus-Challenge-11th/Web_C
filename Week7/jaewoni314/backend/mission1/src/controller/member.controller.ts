@@ -1,10 +1,10 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { MemberService } from "../service/member.service.js";
 import { CreateMemberDto } from "../dto/create-member.dto.js";
 import { MemberUpdateRequestDto } from "../dto/member-update-request.dto.js";
 import { ApiResponse } from "../common/api-response.js";
-// AuthenticatedRequest는 데코레이터가 붙은 매개변수의 타입이라 type으로 가져와야 빌드돼요.
-import { AuthGuard, type AuthenticatedRequest } from "../guard/auth.guard.js";
+import { AuthGuard } from "../guard/auth.guard.js";
+import { LoginMember } from "../decorator/login-member.decorator.js";
 
 @Controller("members")
 export class MemberController {
@@ -27,21 +27,18 @@ export class MemberController {
     return ApiResponse.success("COMMON201", "회원가입에 성공했습니다.", result);
   }
 
-  // URL에 누구의 정보인지 적지 않아요. AuthGuard가 토큰에서 알아낸 회원 ID를 써요.
+  // URL에 누구의 정보인지 적지 않아요. AuthGuard가 토큰에서 알아낸 회원 ID를 @LoginMember()로 받아요.
+  // @UseGuards(AuthGuard)를 빠뜨리면 토큰을 검사하지 않아서, @LoginMember()가 회원 ID를 찾지 못하고 500이 나요.
   @Get("me")
-  @UseGuards(AuthGuard) // 이 줄이 있어야 컨트롤러보다 먼저 토큰을 검사하고 회원 ID를 요청에 담아요.
-  async getMyInfo(@Req() request: AuthenticatedRequest) {
-    const memberId = request.memberId;
-
+  @UseGuards(AuthGuard)
+  async getMyInfo(@LoginMember() memberId: number) {
     const result = await this.memberService.getMyInfo(memberId);
     return ApiResponse.success("COMMON200", "회원 정보를 조회했습니다.", result);
   }
 
   @Patch("me")
   @UseGuards(AuthGuard)
-  async updateMyInfo(@Req() request: AuthenticatedRequest, @Body() dto: MemberUpdateRequestDto) {
-    const memberId = request.memberId;
-
+  async updateMyInfo(@LoginMember() memberId: number, @Body() dto: MemberUpdateRequestDto) {
     const result = await this.memberService.updateMyInfo(memberId, dto);
     return ApiResponse.success("COMMON200", "회원 정보를 수정했습니다.", result);
   }
