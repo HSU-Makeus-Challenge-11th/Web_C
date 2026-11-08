@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
+import { isHTTPError } from "ky";
 import { useState, type SubmitEvent } from "react";
 import { checkEmail } from "../../api/members/check-email";
 import { checkNickname } from "../../api/members/check-nickname";
@@ -101,6 +102,12 @@ export function SignupPage() {
       alert(response.message);
       navigate({ to: "/login" });
     } catch (error) {
+      // 중복 확인 뒤 다른 사람이 같은 값으로 먼저 가입하면 서버가 409로 막아요.
+      // "사용할 수 있어요" 결과가 더는 맞지 않으므로 지우고 다시 확인하게 해요.
+      if (isHTTPError(error) && error.response.status === 409) {
+        emailCheck.reset();
+        nicknameCheck.reset();
+      }
       // 실패하면 입력값을 그대로 두어 다시 요청할 수 있어요.
       alert(getApiErrorMessage(error, "회원가입에 실패했어요. 다시 시도해 주세요."));
     } finally {

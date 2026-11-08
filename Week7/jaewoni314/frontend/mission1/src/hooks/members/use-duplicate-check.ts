@@ -36,7 +36,10 @@ export function useDuplicateCheck(
     }
   };
 
-  return { getStatus, check };
+  // 서버에서 중복으로 막혔을 때처럼, 확인 결과를 더 믿을 수 없으면 지워서 다시 확인하게 해요.
+  const reset = () => setResult(null);
+
+  return { getStatus, check, reset };
 }
 
 // 중복 확인 상태를 입력창 아래 안내 문구로 바꿔요. FormField에 그대로 펼쳐 넘길 수 있어요.
