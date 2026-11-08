@@ -47,6 +47,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       };
     }
 
+    // 요청 본문이 너무 크거나(413) 문자셋이나 압축 방식을 지원하지 않으면(415) body-parser가 HttpException이 아닌 오류를 던져요.
+    // 클라이언트가 고쳐야 하는 오류라 500으로 바꾸지 않고, 그 오류에 담긴 상태 코드로 응답해요.
+    const clientError = getClientError(exception);
+    if (clientError) {
+      return clientError;
+    }
+
     // 서비스의 중복 확인을 통과해도, 동시에 들어온 요청은 DB의 UNIQUE 제약에서 막힐 수 있어요.
     const duplicateKey = getDuplicateKey(exception);
     if (duplicateKey) {
@@ -67,6 +74,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       message: "서버 내부 오류가 발생했습니다.",
     };
   }
+}
+
+// body-parser처럼 http-errors 형식(status, expose)으로 던진 4xx 오류라면 그 상태 코드와 메시지를 써요.
+function getClientError(exception: unknown): ErrorCode | null {
+  const error = exception as { status?: unknown; expose?: unknown; message?: unknown } | null | undefined;
+  if (typeof error?.status !== "number" || error.status < 400 || error.status >= 500 || error.expose !== true) {
+    return null;
+  }
+  return { status: error.status, code: `COMMON${error.status}`, message: String(error.message) };
 }
 
 // MySQL 중복 오류(ER_DUP_ENTRY)라면 "Duplicate entry '...' for key 'member.email'"의 key 이름을 꺼내요.
