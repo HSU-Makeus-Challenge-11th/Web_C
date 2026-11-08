@@ -19,7 +19,7 @@ npm run start:dev
 
 ```json
 { "isSuccess": true, "code": "COMMON201", "message": "회원가입에 성공했습니다.", "result": { "memberId": 1, "email": "umc@example.com", "nickname": "moviefan" } }
-{ "isSuccess": false, "code": "MEMBER4091", "message": "이미 사용 중인 이메일입니다.", "result": null }
+{ "isSuccess": false, "code": "MEMBER409_2", "message": "이미 사용 중인 이메일입니다.", "result": null }
 ```
 
 ## API 명세
@@ -44,15 +44,17 @@ npm run start:dev
 
 ### 오류 코드
 
+도메인별 오류 code는 `{도메인}{HTTP 상태 코드}_{일련번호}` 규칙이고, 공통 오류는 `COMMON{HTTP 상태 코드}`입니다.
+
 | status | code | 상황 |
 | --- | --- | --- |
 | 400 | `COMMON400` | 입력 검증 실패, DTO에 없는 필드, 잘못된 JSON, 숫자가 아닌 경로 값 |
-| 403 | `RATING4031` | 다른 회원의 평점을 수정/삭제 |
-| 404 | `MEMBER4041` | 존재하지 않는 회원 |
-| 404 | `RATING4041` | 존재하지 않는 평점 |
-| 409 | `MEMBER4091` | 이미 사용 중인 이메일 |
-| 409 | `MEMBER4092` | 이미 사용 중인 닉네임 |
-| 409 | `RATING4091` | 같은 영화에 이미 평점을 남김 |
+| 403 | `RATING403_1` | 다른 회원의 평점을 수정/삭제 |
+| 404 | `MEMBER404_1` | 존재하지 않는 회원 |
+| 404 | `RATING404_1` | 존재하지 않는 평점 |
+| 409 | `MEMBER409_1` | 이미 사용 중인 닉네임 |
+| 409 | `MEMBER409_2` | 이미 사용 중인 이메일 |
+| 409 | `RATING409_1` | 같은 영화에 이미 평점을 남김 |
 | 500 | `COMMON500` | 그 밖의 서버 오류 |
 
 서비스에서 중복을 먼저 확인해도 동시에 들어온 요청은 DB UNIQUE 제약에서 막힐 수 있습니다. 전역 예외 필터가 이 DB 오류(`ER_DUP_ENTRY`)도 제약 이름에 맞는 409 코드로 바꿔 응답합니다.
