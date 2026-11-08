@@ -1,3 +1,4 @@
+import { Transform } from "class-transformer";
 import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from "class-validator";
 
 // class-validator는 여러 규칙이 함께 실패하면 아래쪽 데코레이터의 메시지를 먼저 담고, 전역 필터는 그 첫 번째 메시지만 응답해요.
@@ -14,6 +15,8 @@ export class CreateMemberDto {
   })
   password: string;
 
+  // 앞뒤 공백을 지운 뒤 검사해서, 공백만 보낸 닉네임('   ')은 "입력해주세요"로 막고 ' 영화광 '은 '영화광'으로 저장해요.
+  @Transform(({ value }: { value: unknown }) => (typeof value === "string" ? value.trim() : value))
   @MaxLength(12, { message: "닉네임은 12자 이하여야 합니다." })
   @MinLength(2, { message: "닉네임은 2자 이상이어야 합니다." })
   @IsString({ message: "닉네임은 문자열이어야 합니다." })
