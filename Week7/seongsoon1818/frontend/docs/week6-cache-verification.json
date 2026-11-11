@@ -1,0 +1,144 @@
+{
+  "verifiedDate": "2026-11-01",
+  "checks": [
+    {
+      "name": "목록 최초 방문 및 Devtools Fresh 캐시",
+      "addedRequests": 1
+    },
+    {
+      "name": "상세에서 목록으로 돌아오면 캐시 재사용",
+      "addedRequests": 0
+    },
+    {
+      "name": "상세 화면 재방문도 캐시 재사용",
+      "addedRequests": 0
+    },
+    {
+      "name": "목록 page=2는 별도 요청과 캐시",
+      "addedRequests": 1
+    },
+    {
+      "name": "검색 query/page별 캐시 분리와 이전 페이지 재사용",
+      "addedRequests": 0
+    },
+    {
+      "name": "Query Devtools에서 목록·검색·상세의 독립 캐시 항목 확인"
+    },
+    {
+      "name": "1분 경과만으로는 자동 요청하지 않고 stale 상태로 전환",
+      "addedRequests": 0
+    },
+    {
+      "name": "stale 캐시로 화면을 먼저 표시하고 재방문 시 백그라운드 갱신",
+      "addedRequests": 1
+    },
+    {
+      "name": "5분간 사용하지 않은 캐시 제거, 현재 화면 캐시는 유지",
+      "addedRequests": 0
+    },
+    {
+      "name": "브라우저 새로고침은 메모리 캐시를 새로 만들고 다시 요청",
+      "addedRequests": 1
+    }
+  ],
+  "expectedKeys": [
+    [
+      "movies",
+      "list",
+      {
+        "page": 1
+      }
+    ],
+    [
+      "movies",
+      "list",
+      {
+        "page": 2
+      }
+    ],
+    [
+      "movies",
+      "detail",
+      155
+    ],
+    [
+      "movies",
+      "search",
+      {
+        "query": "love",
+        "page": 1
+      }
+    ],
+    [
+      "movies",
+      "search",
+      {
+        "query": "love",
+        "page": 2
+      }
+    ]
+  ],
+  "requests": [
+    {
+      "phase": "initial",
+      "path": "/3/movie/popular",
+      "parameters": {
+        "language": "ko-KR",
+        "page": "1"
+      }
+    },
+    {
+      "phase": "detail-initial",
+      "path": "/3/movie/155",
+      "parameters": {
+        "language": "ko-KR"
+      }
+    },
+    {
+      "phase": "list-page-2",
+      "path": "/3/movie/popular",
+      "parameters": {
+        "language": "ko-KR",
+        "page": "2"
+      }
+    },
+    {
+      "phase": "search-initial",
+      "path": "/3/search/movie",
+      "parameters": {
+        "query": "love",
+        "language": "ko-KR",
+        "include_adult": "false",
+        "page": "1"
+      }
+    },
+    {
+      "phase": "search-page-2",
+      "path": "/3/search/movie",
+      "parameters": {
+        "query": "love",
+        "language": "ko-KR",
+        "include_adult": "false",
+        "page": "2"
+      }
+    },
+    {
+      "phase": "stale-list-return",
+      "path": "/3/movie/popular",
+      "parameters": {
+        "language": "ko-KR",
+        "page": "1"
+      }
+    },
+    {
+      "phase": "browser-reload",
+      "path": "/3/movie/popular",
+      "parameters": {
+        "language": "ko-KR",
+        "page": "1"
+      }
+    }
+  ],
+  "javascriptErrors": [],
+  "note": "실제 TMDB 응답 사용. HTTP 캐시는 CDP로 비활성화. stale/gc 검증은 브라우저 가상 시계 사용. 인증 값 미기록."
+}
