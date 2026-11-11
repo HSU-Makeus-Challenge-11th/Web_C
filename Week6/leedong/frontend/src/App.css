@@ -1,0 +1,261 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- 헤더 ---------- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 91px;
+  padding: 24px 80px;
+  background: #fff;
+  border-bottom: 1px solid #e3e6eb;
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 42px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid #17191e;
+  border-radius: 8px;
+}
+
+.brand-name {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.7px;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-link {
+  font-size: 14px;
+  font-weight: 700;
+  color: #606774;
+}
+
+.nav-link-active {
+  color: #17191e;
+  text-decoration: underline;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 42px;
+  height: 42px;
+  background: #fff;
+  border: 1px solid #e3e6eb;
+  border-radius: 8px;
+  color: #606774;
+}
+
+.login-btn {
+  height: 42px;
+  padding: 0 16px;
+  background: #2563eb;
+  border: 1px solid #fff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+}
+
+/* 아이콘 (svg 모양을 마스크로 쓰고 글자색으로 칠해요) */
+.icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-color: currentColor;
+  -webkit-mask: center / contain no-repeat;
+  mask: center / contain no-repeat;
+}
+
+.icon-movie {
+  -webkit-mask-image: url("/icons/movie.svg");
+  mask-image: url("/icons/movie.svg");
+  color: #17191e;
+}
+
+.icon-search {
+  -webkit-mask-image: url("/icons/search.svg");
+  mask-image: url("/icons/search.svg");
+}
+
+.icon-chevron-left {
+  -webkit-mask-image: url("/icons/chevron-left.svg");
+  mask-image: url("/icons/chevron-left.svg");
+}
+
+.icon-chevron-right {
+  -webkit-mask-image: url("/icons/chevron-right.svg");
+  mask-image: url("/icons/chevron-right.svg");
+}
+
+/* ---------- 본문 ---------- */
+.container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 80px 48px;
+}
+
+.page-title {
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 44px;
+  letter-spacing: -1.71px;
+}
+
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  column-gap: 18px;
+  row-gap: 21px;
+}
+
+.movie-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.poster {
+  position: relative;
+  height: 274px;
+  background: #f6f7f9;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.poster img.poster-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bookmark-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 34px;
+  height: 34px;
+  background: #17191e;
+  border: 1px solid #fff;
+  border-radius: 8px;
+}
+
+.bookmark-btn.is-active {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.bookmark-btn img {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1); /* 검은 아이콘을 흰색으로 */
+}
+
+.movie-title {
+  padding-top: 5px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 17px;
+}
+
+.movie-meta {
+  font-size: 12px;
+  line-height: 14px;
+  color: #969da8;
+}
+
+/* ---------- 페이지네이션 ---------- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.page-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.page-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #606774;
+}
+
+.page-btn.is-active {
+  background: #17191e;
+  color: #fff;
+}
+
+.page-arrow {
+  display: flex;
+  background: transparent;
+  border: none;
+  color: #606774;
+}
+
+.page-arrow:disabled {
+  color: #d9e5ff;
+  cursor: default;
+}
+
+/* ---------- 푸터 ---------- */
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 57px;
+  padding: 16px 80px;
+  background: #fff;
+  font-size: 12px;
+  color: #606774;
+}
