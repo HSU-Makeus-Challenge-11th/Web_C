@@ -60,4 +60,14 @@ export const ErrorCodes = {
     code: "RATING409_1",
     message: "이미 이 영화에 평점을 남기셨습니다.",
   },
+  FAVORITE_NOT_FOUND: {
+    status: HttpStatus.NOT_FOUND,
+    code: "FAVORITE404_1",
+    message: "즐겨찾기한 영화를 찾을 수 없습니다.",
+  },
+  FAVORITE_DUPLICATED: {
+    status: HttpStatus.CONFLICT,
+    code: "FAVORITE409_1",
+    message: "이미 이 영화를 즐겨찾기하셨습니다.",
+  },
 } satisfies Record<string, ErrorCode>;

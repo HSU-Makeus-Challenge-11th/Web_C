@@ -4,12 +4,15 @@ import { JwtModule } from "@nestjs/jwt";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Member } from "./entity/member.entity.js";
 import { Rating } from "./entity/rating.entity.js";
+import { Favorite } from "./entity/favorite.entity.js";
 import { AuthController } from "./controller/auth.controller.js";
 import { MemberController } from "./controller/member.controller.js";
 import { RatingController } from "./controller/rating.controller.js";
+import { FavoriteController } from "./controller/favorite.controller.js";
 import { AuthService } from "./service/auth.service.js";
 import { MemberService } from "./service/member.service.js";
 import { RatingService } from "./service/rating.service.js";
+import { FavoriteService } from "./service/favorite.service.js";
 
 @Module({
   imports: [
@@ -24,7 +27,7 @@ import { RatingService } from "./service/rating.service.js";
       autoLoadEntities: true,
       synchronize: false,
     }),
-    TypeOrmModule.forFeature([Member, Rating]),
+    TypeOrmModule.forFeature([Member, Rating, Favorite]),
     JwtModule.registerAsync({
       global: true, // 전역으로 등록해서 어느 서비스나 Guard에서든 JwtService를 주입받을 수 있어요.
       inject: [ConfigService],
@@ -52,7 +55,7 @@ import { RatingService } from "./service/rating.service.js";
       },
     }),
   ],
-  controllers: [AuthController, MemberController, RatingController],
-  providers: [AuthService, MemberService, RatingService],
+  controllers: [AuthController, MemberController, RatingController, FavoriteController],
+  providers: [AuthService, MemberService, RatingService, FavoriteService],
 })
 export class AppModule {}

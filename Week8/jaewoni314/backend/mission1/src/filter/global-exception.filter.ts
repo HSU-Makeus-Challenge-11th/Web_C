@@ -17,6 +17,7 @@ const DUPLICATE_KEY_ERRORS: Record<string, ErrorCode> = {
   "member.email": ErrorCodes.MEMBER_EMAIL_DUPLICATED,
   "member.nickname": ErrorCodes.MEMBER_NICKNAME_DUPLICATED,
   "rating.uk_rating_member_movie": ErrorCodes.RATING_DUPLICATED,
+  "favorite.uk_favorite_member_movie": ErrorCodes.FAVORITE_DUPLICATED,
 };
 
 // 어디에서 오류가 나도 { isSuccess: false, code, message, result: null } 형식으로 응답해요.
