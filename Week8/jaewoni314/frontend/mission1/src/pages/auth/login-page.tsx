@@ -3,6 +3,7 @@ import { useState, type SubmitEvent } from "react";
 import { AuthLayout } from "../../components/auth/auth-layout";
 import { primaryButtonClass } from "../../components/form/button-styles";
 import { FormField } from "../../components/form/form-field";
+import { useLoginMutation } from "../../hooks/auth/use-login-mutation";
 import { cn } from "../../utils/cn";
 import {
   MEMBER_INPUT_ERROR_MESSAGES,
@@ -18,6 +19,7 @@ type LoginFormKey = keyof typeof DEFAULT_FORM;
 
 export function LoginPage() {
   const [form, setForm] = useState(DEFAULT_FORM);
+  const loginMutation = useLoginMutation();
 
   const email = form.email.trim();
   const isEmailValid = isValidEmail(email);
@@ -34,10 +36,9 @@ export function LoginPage() {
 
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!canSubmit) return;
+    if (!canSubmit || loginMutation.isPending) return;
 
-    // 로그인 API 연결과 JWT 저장은 8주차에 진행해요.
-    alert(`${email} 계정으로 로그인하는 API는 8주차에 연결할 예정이에요.`);
+    loginMutation.mutate({ email, password: form.password });
   };
 
   return (
@@ -62,6 +63,8 @@ export function LoginPage() {
           placeholder="example@umc.com"
           value={form.email}
           onChange={(event) => handleChangeField("email", event.target.value)}
+          // 요청 중에는 값을 바꾸지 못하게 해요.
+          disabled={loginMutation.isPending}
           message={showEmailError ? MEMBER_INPUT_ERROR_MESSAGES.email : undefined}
           messageTone="error"
         />
@@ -74,10 +77,15 @@ export function LoginPage() {
           placeholder="비밀번호를 입력해 주세요"
           value={form.password}
           onChange={(event) => handleChangeField("password", event.target.value)}
+          disabled={loginMutation.isPending}
         />
 
-        <button type="submit" className={cn(primaryButtonClass, "mt-3")} disabled={!canSubmit}>
-          로그인
+        <button
+          type="submit"
+          className={cn(primaryButtonClass, "mt-3")}
+          disabled={!canSubmit || loginMutation.isPending}
+        >
+          {loginMutation.isPending ? "로그인 중" : "로그인"}
         </button>
       </form>
     </AuthLayout>
