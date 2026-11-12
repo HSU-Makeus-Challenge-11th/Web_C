@@ -1,34 +1,65 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { memberQueries } from "../../api/members/member-queries";
 import { secondaryButtonClass } from "../../components/form/button-styles";
+import { StatusMessage } from "../../components/movies/status-message";
+import { useLogout } from "../../hooks/auth/use-logout";
 import { useBookmarkStore } from "../../stores/bookmark-store";
-import { useMyInfoStore } from "../../stores/my-info-store";
+import { getApiErrorMessage } from "../../utils/get-api-error-message";
 
-// "2026-09-13" → "2026년 9월 13일". Date로 바꾸지 않아 시간대에 따라 날짜가 바뀌지 않아요.
-function formatJoinedAt(date: string) {
-  const [year, month, day] = date.split("-").map(Number);
-  return `${year}년 ${month}월 ${day}일`;
+// "2026-11-12T10:46:25.000Z" → "2026년 11월 12일" (한국 시간 기준)
+function formatJoinedAt(createdAt: string) {
+  return new Date(createdAt).toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "Asia/Seoul",
+  });
 }
 
 export function MyInfoPage() {
-  const myInfo = useMyInfoStore((state) => state.myInfo);
+  // (protected) Layout을 지나왔으므로 토큰이 있어요. 헤더와 같은 key라서 헤더가 받아 둔 캐시를 그대로 써요.
+  const meQuery = useQuery(memberQueries.me());
   const bookmarkCount = useBookmarkStore((state) => state.bookmarkedMovieIds.length);
+  const logout = useLogout();
 
+  if (meQuery.isPending) {
+    return (
+      <main className="mx-auto w-full max-w-[720px] px-6">
+        <StatusMessage>내 정보를 불러오는 중이에요.</StatusMessage>
+      </main>
+    );
+  }
+
+  if (meQuery.isError) {
+    return (
+      <main className="mx-auto w-full max-w-[720px] px-6">
+        <StatusMessage isError>
+          {getApiErrorMessage(meQuery.error, "내 정보를 불러오지 못했어요.")}
+        </StatusMessage>
+      </main>
+    );
+  }
+
+  const me = meQuery.data;
   // 프로필 사진 대신 닉네임의 첫 글자를 보여 줘요.
-  const avatarText = Array.from(myInfo.nickname)[0] ?? "?";
+  const avatarText = Array.from(me.nickname)[0] ?? "?";
 
   const infoRows = [
-    { label: "이메일", value: myInfo.email },
-    { label: "닉네임", value: myInfo.nickname },
-    { label: "가입일", value: formatJoinedAt(myInfo.joinedAt) },
+    { label: "이메일", value: me.email },
+    { label: "닉네임", value: me.nickname },
+    { label: "가입일", value: formatJoinedAt(me.createdAt) },
     { label: "북마크한 영화", value: `${bookmarkCount}편` },
   ];
 
   return (
     <main className="mx-auto w-full max-w-[720px] px-6 pb-20 pt-12">
-      <h1 className="text-[32px] font-bold tracking-[-0.02em]">내 정보</h1>
-      <p className="mt-2 text-[15px] text-muted">
-        8주차에 내 정보 조회 API를 연결하기 전까지 예시 회원 정보를 보여 줘요.
-      </p>
+      <div className="flex items-end justify-between gap-4">
+        <h1 className="text-[32px] font-bold tracking-[-0.02em]">내 정보</h1>
+        <button type="button" className="text-sm font-medium text-muted hover:text-text" onClick={logout}>
+          로그아웃
+        </button>
+      </div>
 
       <section
         className="mt-8 flex flex-col items-center gap-5 rounded-xl border border-line p-6 sm:flex-row"
@@ -51,8 +82,8 @@ export function MyInfoPage() {
         </div>
 
         <div className="min-w-0 text-center sm:text-left">
-          <p className="break-all text-xl font-bold">{myInfo.nickname}</p>
-          <p className="mt-1 break-all text-[15px] text-muted">{myInfo.email}</p>
+          <p className="break-all text-xl font-bold">{me.nickname}</p>
+          <p className="mt-1 break-all text-[15px] text-muted">{me.email}</p>
         </div>
 
         <Link to="/my/edit" className={`${secondaryButtonClass} sm:ml-auto`}>
