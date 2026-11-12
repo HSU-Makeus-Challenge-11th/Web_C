@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { favoriteQueries } from "../../api/favorites/favorite-queries";
 import { memberQueries } from "../../api/members/member-queries";
+import { ratingQueries } from "../../api/ratings/rating-queries";
 import { useAuthStore } from "../../stores/auth-store";
 
 // 서버에 로그아웃 API가 없어서, 이 브라우저의 토큰과 회원별 캐시를 지우는 것으로 로그아웃해요.
@@ -17,6 +18,7 @@ export function useLogout() {
     // 다른 회원이 이어서 로그인했을 때 이전 회원의 정보가 잠깐이라도 보이지 않게 캐시를 지워요.
     queryClient.removeQueries({ queryKey: memberQueries.me().queryKey });
     queryClient.removeQueries({ queryKey: favoriteQueries.all() });
+    queryClient.removeQueries({ queryKey: ratingQueries.all() });
     alert("로그아웃했어요.");
   };
 }

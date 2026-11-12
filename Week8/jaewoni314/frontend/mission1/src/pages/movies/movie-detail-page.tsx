@@ -3,6 +3,7 @@ import { Link, useParams } from "@tanstack/react-router";
 import { movieQueries } from "../../api/movies/movie-queries";
 import { FavoriteButton } from "../../components/movies/favorite-button";
 import { MovieImage } from "../../components/movies/movie-image";
+import { MyRatingSection } from "../../components/ratings/my-rating-section";
 import { StatusMessage } from "../../components/movies/status-message";
 import { formatRuntime } from "../../utils/movies/format-runtime";
 import { getMovieDetailErrorMessage } from "../../utils/movies/get-movie-detail-error-message";
@@ -95,6 +96,8 @@ export function MovieDetailPage() {
             </p>
           </div>
         </div>
+
+        <MyRatingSection movieId={movie.id} />
       </div>
     </main>
   );

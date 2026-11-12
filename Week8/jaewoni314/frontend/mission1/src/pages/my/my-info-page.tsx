@@ -5,6 +5,7 @@ import { favoriteQueries } from "../../api/favorites/favorite-queries";
 import { secondaryButtonClass } from "../../components/form/button-styles";
 import { StatusMessage } from "../../components/movies/status-message";
 import { FavoriteMovieList } from "../../components/my/favorite-movie-list";
+import { MyRatingList } from "../../components/my/my-rating-list";
 import { useLogout } from "../../hooks/auth/use-logout";
 import { getApiErrorMessage } from "../../utils/get-api-error-message";
 
@@ -103,6 +104,7 @@ export function MyInfoPage() {
       </dl>
 
       <FavoriteMovieList />
+      <MyRatingList />
     </main>
   );
 }

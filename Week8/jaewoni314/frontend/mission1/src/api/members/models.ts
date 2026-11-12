@@ -1,4 +1,4 @@
-// 6주차 서버의 공통 응답 형식이에요.
+// 우리 서버(NestJS)의 공통 응답 형식이에요.
 interface ApiResponse<T> {
   isSuccess: boolean;
   code: string;
