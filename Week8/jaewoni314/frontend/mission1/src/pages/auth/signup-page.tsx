@@ -1,9 +1,8 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { isHTTPError } from "ky";
 import { useState, type SubmitEvent } from "react";
 import { checkEmail } from "../../api/members/check-email";
 import { checkNickname } from "../../api/members/check-nickname";
-import { signup } from "../../api/members/signup";
 import { AuthLayout } from "../../components/auth/auth-layout";
 import {
   duplicateCheckButtonClass,
@@ -14,7 +13,7 @@ import {
   getDuplicateCheckMessage,
   useDuplicateCheck,
 } from "../../hooks/members/use-duplicate-check";
-import { getApiErrorMessage } from "../../utils/get-api-error-message";
+import { useSignupMutation } from "../../hooks/members/use-signup-mutation";
 import {
   MEMBER_INPUT_ERROR_MESSAGES,
   isValidEmail,
@@ -33,10 +32,9 @@ type SignupFormKey = keyof typeof DEFAULT_FORM;
 
 export function SignupPage() {
   const [form, setForm] = useState(DEFAULT_FORM);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const emailCheck = useDuplicateCheck(checkEmail, "이메일");
   const nicknameCheck = useDuplicateCheck(checkNickname, "닉네임");
-  const navigate = useNavigate();
+  const signupMutation = useSignupMutation();
 
   const email = form.email.trim();
   const nickname = form.nickname.trim();
@@ -91,28 +89,26 @@ export function SignupPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     // 폼 제출 시 페이지 새로고침 방지
     event.preventDefault();
-    if (!canSubmit || isSubmitting) return;
+    if (!canSubmit || signupMutation.isPending) return;
 
-    setIsSubmitting(true);
-    try {
-      const response = await signup({ email, nickname, password: form.password });
-      alert(response.message);
-      navigate({ to: "/login" });
-    } catch (error) {
-      // 중복 확인 뒤 다른 사람이 같은 값으로 먼저 가입하면 서버가 409로 막아요.
-      // "사용할 수 있어요" 결과가 더는 맞지 않으므로 지우고 다시 확인하게 해요.
-      if (isHTTPError(error) && error.response.status === 409) {
-        emailCheck.reset();
-        nicknameCheck.reset();
-      }
-      // 실패하면 입력값을 그대로 두어 다시 요청할 수 있어요.
-      alert(getApiErrorMessage(error, "회원가입에 실패했어요. 다시 시도해 주세요."));
-    } finally {
-      setIsSubmitting(false);
-    }
+    // 성공과 공통 실패 처리(알림)는 useSignupMutation에 있어요.
+    // 이 화면에서만 필요한 처리는 mutate의 두 번째 인자로 더해요.
+    signupMutation.mutate(
+      { email, nickname, password: form.password },
+      {
+        onError: (error) => {
+          // 중복 확인 뒤 다른 사람이 같은 값으로 먼저 가입하면 서버가 409로 막아요.
+          // "사용할 수 있어요" 결과가 더는 맞지 않으므로 지우고 다시 확인하게 해요.
+          if (isHTTPError(error) && error.response.status === 409) {
+            emailCheck.reset();
+            nicknameCheck.reset();
+          }
+        },
+      },
+    );
   };
 
   return (
@@ -199,9 +195,9 @@ export function SignupPage() {
         <button
           type="submit"
           className={`${primaryButtonClass} mt-3`}
-          disabled={!canSubmit || isSubmitting}
+          disabled={!canSubmit || signupMutation.isPending}
         >
-          {isSubmitting ? "가입 중" : "가입하기"}
+          {signupMutation.isPending ? "가입 중" : "가입하기"}
         </button>
       </form>
     </AuthLayout>
