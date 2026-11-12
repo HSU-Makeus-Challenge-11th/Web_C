@@ -1,6 +1,8 @@
-# Week7 Backend - 로그인과 JWT 인증, 내 데이터만 수정하기 (NestJS + TypeORM)
+# Week8 Backend - 즐겨찾기와 영화 기록, 트랜잭션 (NestJS + TypeORM)
 
-6주차 영화 평점 서비스에 로그인(JWT Access Token 발급)과 토큰 검사 Guard를 더했습니다. 평점 등록/수정/삭제는 경로에서 `memberId`를 없애고 토큰으로 요청자를 알아내며, 다른 회원의 평점은 수정하거나 삭제할 수 없습니다.
+7주차 로그인/JWT 인증 위에 **즐겨찾기 API 4개**와 평점과 즐겨찾기를 한 트랜잭션으로 저장하는 **영화 기록 API**를 더했습니다. 모든 API는 요청의 URL, 바디 어디에도 `memberId`를 받지 않고 토큰으로 회원을 식별합니다. 선택 미션으로 Swagger 문서(`/docs`)를 붙였습니다.
+
+미션 기록(캡처, 핵심 키워드, 트러블 슈팅)은 [docs/mission-record.md](docs/mission-record.md)에 정리했습니다.
 
 ## 실행 방법
 
@@ -15,6 +17,8 @@
 npm install
 npm run start:dev
 ```
+
+서버를 켠 뒤 http://localhost:3000/docs 에서 Swagger 문서를 보고 바로 요청해 볼 수 있습니다. 자물쇠가 있는 API는 `POST /auth/login`으로 받은 `accessToken`을 오른쪽 위 **Authorize**에 넣어야 합니다.
 
 시드 회원(`noco@umc.com`, `minseo@umc.com`)의 비밀번호는 bcrypt 해시가 아닌 더미 값이라 로그인할 수 없습니다. 회원가입 API로 새 회원을 만든 뒤 로그인해 주세요.
 
@@ -43,6 +47,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 | API | Method | URL | 토큰 | Request Body | 성공 |
 | --- | --- | --- | --- | --- | --- |
+| 즐겨찾기 등록 (8주차) | POST | `/favorites` | 필요 | `movieId` | 201, `result`: `{ favoriteId, movieId, createdAt }` |
+| 내 즐겨찾기 조회 (8주차) | GET | `/favorites` | 필요 | - | 200, `result`: 즐겨찾기 배열 (favoriteId 내림차순, 없으면 `[]`) |
+| 즐겨찾기 여부 조회 (8주차) | GET | `/favorites/{movieId}` | 필요 | - | 200, `result`: `{ isFavorite }` (안 했어도 200) |
+| 즐겨찾기 해제 (8주차) | DELETE | `/favorites/{movieId}` | 필요 | - | 200, `result`: null |
+| 영화 기록 저장 (8주차) | POST | `/movie-records` | 필요 | `movieId`, `score`, `comment?`, `addToFavorites` | 201, `result`: `{ rating, favorite }` (`addToFavorites`가 false면 `favorite`: null) |
 | 로그인 (7주차) | POST | `/auth/login` | - | `email`, `password` | 200, `result`: `{ nickname, accessToken }` |
 | 내 정보 조회 (7주차) | GET | `/members/me` | 필요 | - | 200, `result`: `{ email, nickname, createdAt }` |
 | 내 정보 수정 (7주차) | PATCH | `/members/me` | 필요 | `nickname` | 200, `result`: `{ email, nickname, createdAt }` |
@@ -55,6 +64,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 | 유저별 평점 조회 (5주차) | GET | `/members/{memberId}/ratings` | - | - | 200, 평점 배열 (최신순) |
 
 평점 응답(`result`)은 `{ ratingId, movieId, score, comment, createdAt, updatedAt }`입니다.
+
+### 영화 기록과 트랜잭션 (8주차)
+
+`POST /movie-records`는 `dataSource.transaction()` 안에서 평점과 즐겨찾기를 저장합니다. 콜백이 끝까지 성공하면 commit, 중간에 오류가 나면 rollback되어 **평점만 저장되는 일이 없습니다.** 콜백 안에서는 `manager.getRepository()`로 꺼낸 Repository만 써야 같은 트랜잭션 연결로 실행됩니다.
+
+- 이미 평점을 남긴 영화면 `RATING409_1`, `addToFavorites: true`인데 이미 즐겨찾기한 영화면 `FAVORITE409_1`이고 둘 다 아무것도 저장하지 않습니다.
+- 미리 확인해도 동시에 들어온 요청은 확인을 함께 통과할 수 있습니다. 이때는 즐겨찾기 INSERT가 DB UNIQUE 제약에서 실패하고, 이미 INSERT된 평점까지 rollback됩니다. 같은 영화에 즐겨찾기 등록과 영화 기록을 동시에 60번 보내 평점이 0건 남는 것을 확인했습니다.
+- `comment`는 워크북 참조 구현과 달리 평점 등록 API와 같은 500자 제한을 뒀습니다. 같은 `rating` 행을 만드는데 API마다 제한이 다르면 한쪽에서 막힌 후기를 다른 쪽으로 저장할 수 있기 때문입니다.
 
 ### 6주차에서 바뀐 점
 
@@ -74,6 +91,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 - `password`: 회원가입은 영문 대문자/소문자/숫자/특수문자(`!@#$%^&*`)를 모두 포함한 8자 이상, bcrypt 해시(60자)로 저장하고 응답에 넣지 않음. 로그인은 문자열이고 비어 있지 않은지만 확인 (회원가입의 비밀번호 규칙은 검사하지 않음)
 - `nickname`: 앞뒤 공백을 지운 뒤 2자 이상 12자 이하 (회원가입, 내 정보 수정 공통)
 - `movieId`: 1 이상의 정수 (TMDB 영화 ID), `score`: 1~5 정수, `comment`: 선택, 500자 이하
+- `addToFavorites`: 필수, `true` 또는 `false` (영화 기록)
 - DTO에 없는 필드를 보내면 400 (평점 등록 바디에 `memberId`를 넣어도 400)
 - 검증 메시지는 6주차 DTO의 문구를 그대로 쓰고(로그인의 `이메일을 입력해주세요.`, `비밀번호를 입력해주세요.`만 새로 추가), 여러 규칙이 함께 틀리면 입력 여부나 형식 같은 가장 기본인 규칙의 메시지를 먼저 보여 줍니다.
 
@@ -91,10 +109,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 | 403 | `RATING403_1` | 다른 회원의 평점을 수정/삭제 |
 | 404 | `MEMBER404_1` | 존재하지 않는 회원 |
 | 404 | `RATING404_1` | 존재하지 않는 평점 |
+| 404 | `FAVORITE404_1` | 즐겨찾기하지 않은 영화를 해제 (8주차) |
 | 404 | `COMMON404` | 없는 경로 (6주차의 평점 등록/수정/삭제 경로 포함) |
 | 409 | `MEMBER409_1` | 이미 사용 중인 닉네임 (회원가입, 내 정보 수정) |
 | 409 | `MEMBER409_2` | 이미 사용 중인 이메일 (회원가입) |
 | 409 | `RATING409_1` | 같은 영화에 이미 평점을 남김 |
+| 409 | `FAVORITE409_1` | 같은 영화를 이미 즐겨찾기함 (8주차) |
 | 413, 415 | `COMMON413`, `COMMON415` | 요청 본문이 너무 큼(100kb 초과), 지원하지 않는 본문 문자셋이나 압축 |
 | 500 | `COMMON500` | 그 밖의 서버 오류 |
 
@@ -106,13 +126,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ```
 src/
-├── controller/   auth.controller.ts, member.controller.ts, rating.controller.ts
-├── service/      auth.service.ts, member.service.ts, rating.service.ts
+├── controller/   auth, member, rating, favorite(8주차), movie-record(8주차) 컨트롤러
+├── service/      auth, member, rating, favorite(8주차), movie-record(8주차, 트랜잭션) 서비스
 ├── guard/        auth.guard.ts (토큰 검사, 회원 ID를 요청에 담음)
 ├── decorator/    login-member.decorator.ts (@LoginMember로 회원 ID 받기)
-├── entity/       base-time.entity.ts, member.entity.ts, rating.entity.ts
+├── entity/       base-time.entity.ts, member.entity.ts, rating.entity.ts, favorite.entity.ts(8주차)
 ├── dto/          요청 DTO(login-request, member-update-request, create-member, create-rating, update-rating)와 응답 DTO
 ├── common/       api-response.ts(공통 응답), error-code.ts(오류 코드), api.exception.ts, password.ts(bcrypt cost)
+├── swagger/      api-docs.ts (Swagger 성공/실패 응답 예시 데코레이터, 8주차 선택 미션)
 ├── filter/       global-exception.filter.ts(전역 예외 처리)
 ├── repository/   (NestJS는 TypeORM Repository를 Service에서 바로 주입받아 비어 있음)
 ├── app.module.ts JwtModule 등록
