@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Favorite, FavoriteStatus } from "../../api/favorites/favorites";
-import { addFavorite, removeFavorite } from "../../api/favorites/favorites";
+import { favoriteMutations } from "../../api/favorites/favorite-mutations";
 import { favoriteQueries } from "../../api/favorites/favorite-queries";
 import { getApiErrorMessage } from "../../utils/get-api-error-message";
 
@@ -11,7 +11,7 @@ export function useAddFavoriteMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: addFavorite,
+    ...favoriteMutations.add(),
     onSuccess: (favorite) => {
       // 상세 화면의 여부 캐시: 방금 등록했으니 true
       queryClient.setQueryData<FavoriteStatus>(favoriteQueries.status(favorite.movieId).queryKey, {
@@ -35,7 +35,7 @@ export function useRemoveFavoriteMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: removeFavorite,
+    ...favoriteMutations.remove(),
     // 해제 응답의 result는 null이라, 요청에 보낸 movieId(variables)로 캐시를 바꿔요.
     onSuccess: (_data, movieId) => {
       queryClient.setQueryData<FavoriteStatus>(favoriteQueries.status(movieId).queryKey, {

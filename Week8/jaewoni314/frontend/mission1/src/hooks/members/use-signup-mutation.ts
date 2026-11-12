@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { signup } from "../../api/members/signup";
+import { memberMutations } from "../../api/members/member-mutations";
 import { getApiErrorMessage } from "../../utils/get-api-error-message";
 
 // 7주차에는 isSubmitting으로 요청 중인지만 직접 관리했어요.
@@ -9,7 +9,7 @@ export function useSignupMutation() {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: signup,
+    ...memberMutations.signup(),
     onSuccess: (response) => {
       alert(response.message);
       navigate({ to: "/login" });

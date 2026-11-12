@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { login } from "../../api/auth/login";
+import { authMutations } from "../../api/auth/auth-mutations";
 import { memberQueries } from "../../api/members/member-queries";
 import { useAuthStore } from "../../stores/auth-store";
 import { getApiErrorMessage } from "../../utils/get-api-error-message";
@@ -11,7 +11,7 @@ export function useLoginMutation() {
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
 
   return useMutation({
-    mutationFn: login,
+    ...authMutations.login(),
     onSuccess: (response) => {
       setAccessToken(response.result.accessToken);
       alert(`${response.result.nickname}님, 로그인에 성공했어요.`);

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ratingQueries } from "../../api/ratings/rating-queries";
-import { createRating, deleteRating, updateRating } from "../../api/ratings/ratings";
+import { ratingMutations } from "../../api/ratings/rating-mutations";
 import { getMemberIdFromToken, useAuthStore } from "../../stores/auth-store";
 import { getApiErrorMessage } from "../../utils/get-api-error-message";
 
@@ -26,7 +26,7 @@ export function useCreateRatingMutation() {
   const invalidateMyRatings = useInvalidateMyRatings();
 
   return useMutation({
-    mutationFn: createRating,
+    ...ratingMutations.create(),
     // onSuccess에서 Promise를 돌려주면, 다시 조회가 끝날 때까지 isPending이 유지돼요.
     // 그래서 "등록 중" 표시가 끝나는 순간 화면에 새 평점이 이미 보여요.
     onSuccess: () => invalidateMyRatings(),
@@ -42,7 +42,7 @@ export function useUpdateRatingMutation() {
   const invalidateMyRatings = useInvalidateMyRatings();
 
   return useMutation({
-    mutationFn: updateRating,
+    ...ratingMutations.update(),
     onSuccess: () => invalidateMyRatings(),
     onError: (error) => {
       alert(getApiErrorMessage(error, "평점을 수정하지 못했어요. 다시 시도해 주세요."));
@@ -55,7 +55,7 @@ export function useDeleteRatingMutation() {
   const invalidateMyRatings = useInvalidateMyRatings();
 
   return useMutation({
-    mutationFn: deleteRating,
+    ...ratingMutations.remove(),
     onSuccess: () => invalidateMyRatings(),
     onError: (error) => {
       alert(getApiErrorMessage(error, "평점을 삭제하지 못했어요. 다시 시도해 주세요."));
