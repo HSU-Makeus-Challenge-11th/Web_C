@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { memberQueries } from "../../api/members/member-queries";
+import { favoriteQueries } from "../../api/favorites/favorite-queries";
 import { secondaryButtonClass } from "../../components/form/button-styles";
 import { StatusMessage } from "../../components/movies/status-message";
+import { FavoriteMovieList } from "../../components/my/favorite-movie-list";
 import { useLogout } from "../../hooks/auth/use-logout";
-import { useBookmarkStore } from "../../stores/bookmark-store";
 import { getApiErrorMessage } from "../../utils/get-api-error-message";
 
 // "2026-11-12T10:46:25.000Z" → "2026년 11월 12일" (한국 시간 기준)
@@ -20,7 +21,8 @@ function formatJoinedAt(createdAt: string) {
 export function MyInfoPage() {
   // (protected) Layout을 지나왔으므로 토큰이 있어요. 헤더와 같은 key라서 헤더가 받아 둔 캐시를 그대로 써요.
   const meQuery = useQuery(memberQueries.me());
-  const bookmarkCount = useBookmarkStore((state) => state.bookmarkedMovieIds.length);
+  // 아래 즐겨찾기 목록과 같은 key라서 요청은 한 번만 나가요.
+  const favoriteCountQuery = useQuery({ ...favoriteQueries.list(), select: (favorites) => favorites.length });
   const logout = useLogout();
 
   if (meQuery.isPending) {
@@ -49,7 +51,7 @@ export function MyInfoPage() {
     { label: "이메일", value: me.email },
     { label: "닉네임", value: me.nickname },
     { label: "가입일", value: formatJoinedAt(me.createdAt) },
-    { label: "북마크한 영화", value: `${bookmarkCount}편` },
+    { label: "즐겨찾기한 영화", value: favoriteCountQuery.isSuccess ? `${favoriteCountQuery.data}편` : "-" },
   ];
 
   return (
@@ -99,6 +101,8 @@ export function MyInfoPage() {
           </div>
         ))}
       </dl>
+
+      <FavoriteMovieList />
     </main>
   );
 }

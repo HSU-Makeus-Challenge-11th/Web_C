@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
 import { movieQueries } from "../../api/movies/movie-queries";
-import { BookmarkButton } from "../../components/movies/bookmark-button";
+import { FavoriteButton } from "../../components/movies/favorite-button";
 import { MovieImage } from "../../components/movies/movie-image";
 import { StatusMessage } from "../../components/movies/status-message";
 import { formatRuntime } from "../../utils/movies/format-runtime";
@@ -80,8 +80,9 @@ export function MovieDetailPage() {
                 .filter(Boolean)
                 .join(" · ")}
             </p>
-            <BookmarkButton
+            <FavoriteButton
               movieId={movie.id}
+              source="status"
               movieTitle={movie.title}
               showLabel
               className="mt-3 self-start rounded-lg border border-line px-4 py-2 hover:bg-surface"

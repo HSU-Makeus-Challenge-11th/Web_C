@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useState, type SubmitEvent } from "react";
 import { movieQueries } from "../../api/movies/movie-queries";
-import { BookmarkButton } from "../../components/movies/bookmark-button";
+import { FavoriteButton } from "../../components/movies/favorite-button";
 import { MovieImage } from "../../components/movies/movie-image";
 import { StatusMessage } from "../../components/movies/status-message";
 import { getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
@@ -114,7 +114,7 @@ export function SearchPage() {
                       >
                         상세 보기
                       </Link>
-                      <BookmarkButton movieId={movie.id} movieTitle={movie.title} showLabel />
+                      <FavoriteButton movieId={movie.id} source="list" movieTitle={movie.title} showLabel />
                     </div>
                   </div>
                 </li>

@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { TmdbMovieListItem } from "../../api/movies/models";
 import { getGenreNames } from "../../utils/movies/genre-names";
 import { getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
-import { BookmarkButton } from "./bookmark-button";
+import { FavoriteButton } from "./favorite-button";
 import { MovieImage } from "./movie-image";
 
 interface MovieCardProps {
@@ -21,8 +21,9 @@ export function MovieCard({ movie }: MovieCardProps) {
           />
         </Link>
 
-        <BookmarkButton
+        <FavoriteButton
           movieId={movie.id}
+          source="list"
           movieTitle={movie.title}
           className="absolute right-2 top-2 size-9 justify-center rounded-full bg-black/55 hover:bg-black/75"
         />

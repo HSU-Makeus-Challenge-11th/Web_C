@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { favoriteQueries } from "../../api/favorites/favorite-queries";
 import { memberQueries } from "../../api/members/member-queries";
 import { useAuthStore } from "../../stores/auth-store";
 
@@ -15,6 +16,7 @@ export function useLogout() {
     setAccessToken(null);
     // 다른 회원이 이어서 로그인했을 때 이전 회원의 정보가 잠깐이라도 보이지 않게 캐시를 지워요.
     queryClient.removeQueries({ queryKey: memberQueries.me().queryKey });
+    queryClient.removeQueries({ queryKey: favoriteQueries.all() });
     alert("로그아웃했어요.");
   };
 }
