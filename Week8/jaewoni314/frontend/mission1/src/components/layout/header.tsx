@@ -5,6 +5,7 @@ import { useAuthStore } from "../../stores/auth-store";
 
 const navLinkClass = "text-[15px] font-medium text-muted hover:text-text";
 
+// 영화 상세의 본문(relative z-10)이 스크롤될 때 헤더를 덮지 않도록 헤더를 한 단계 위(z-20)에 둬요.
 export function Header() {
   const accessToken = useAuthStore((state) => state.accessToken);
   // 토큰이 있을 때만 내 정보를 조회해요. 토큰이 유효한지는 이 요청의 응답으로 알 수 있어요.
@@ -14,7 +15,7 @@ export function Header() {
   });
 
   return (
-    <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur-md">
+    <header className="sticky top-0 z-20 border-b border-line bg-bg/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-5 px-6 sm:gap-10">
         <Link
           to="/"
