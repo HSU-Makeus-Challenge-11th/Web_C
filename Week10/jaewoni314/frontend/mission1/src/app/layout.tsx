@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Analytics } from "@vercel/analytics/next";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { AuthHydrator } from "@/components/providers/auth-hydrator";
@@ -42,6 +43,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
           <Footer />
         </QueryProvider>
+        {/* 10주차 선택 미션: Vercel Web Analytics. 페이지 이동마다 방문/조회 데이터를 Vercel 대시보드의 Analytics로 보내요.
+            Vercel에 배포된 사이트에서만 수집하고, 로컬 개발 서버에서는 콘솔에만 찍혀요. */}
+        <Analytics />
       </body>
     </html>
   );
