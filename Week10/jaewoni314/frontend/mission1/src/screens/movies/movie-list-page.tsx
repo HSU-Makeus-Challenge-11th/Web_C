@@ -71,7 +71,7 @@ export function MovieListPage() {
   return (
     <main className="mx-auto max-w-[1200px] px-6 pb-16 pt-12">
       <div className="mb-7 flex flex-wrap items-baseline gap-3">
-        <h1 className="text-[32px] font-bold tracking-[-0.02em]">인기 영화</h1>
+        <h1 className="text-[32px] font-bold tracking-[-0.02em]">지금 인기 있는 영화</h1>
 
         <div
           className="ml-auto flex rounded-lg border border-line p-1"

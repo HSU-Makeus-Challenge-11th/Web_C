@@ -16,7 +16,7 @@ export default function HomePage() {
 function MovieListFallback() {
   return (
     <main className="mx-auto max-w-[1200px] px-6 pb-16 pt-12">
-      <h1 className="text-[32px] font-bold tracking-[-0.02em]">인기 영화</h1>
+      <h1 className="text-[32px] font-bold tracking-[-0.02em]">지금 인기 있는 영화</h1>
       <StatusMessage>영화 목록을 불러오는 중이에요.</StatusMessage>
     </main>
   );
