@@ -1,18 +1,21 @@
-# Week9 Backend - 함께 테스트하고 다듬기 (NestJS + TypeORM + Vitest)
+# Week10 Backend - 배포하고 결과물 완성하기 (NestJS + TypeORM)
 
-8주차까지 만든 15개 API(회원/인증/평점/즐겨찾기/영화 기록)에 새 기능을 더하지 않고, **문서는 코드가 만들고(Swagger), 확인은 코드가 하도록(테스트 코드)** 다듬었습니다.
+9주차 서버(15개 API, Swagger, 단위 4 + 통합 9 테스트)를 **EC2 + RDS에 배포할 수 있도록** 개발/운영 설정을 나눴습니다.
 
-- Swagger 문서를 `/swagger-ui`로 옮기고, 모든 API에 한 줄 설명, 토큰 필요 여부(자물쇠), 요청 예시, 성공/실패 응답(status + code)을 적었습니다.
-- 단위 테스트 4개(가짜 Repository): 즐겨찾기 중복 409, 평점 중복 `RATING409_1`, 남의 평점 수정 `RATING403_1`
-- 통합 테스트 9개(메모리 SQLite `sql.js`): 즐겨찾기 API 4개, 평점 등록 401/201, 영화 기록 트랜잭션 rollback 3개
+- `NODE_ENV`로 설정 파일 선택: 로컬은 `.env.local`, 운영(EC2)은 `.env.production`. 실제 값이 든 파일과 `*.pem`은 Git에 올리지 않고 `*.example`만 공유합니다.
+- CORS 허용 주소를 `FRONTEND_ORIGIN` 환경변수(쉼표로 여러 개)로 받습니다.
+- 외부 요청을 받도록 `0.0.0.0`에서 실행하고, 시작 로그에 환경과 허용 Origin을 남깁니다(비밀 값 제외).
+- 운영 DB의 스키마 자동 변경(`synchronize`)은 모든 환경에서 꺼져 있습니다.
+
+> AWS(EC2, RDS) 배포는 아직 하지 않았습니다. 진행 순서는 [docs/mission-record.md](docs/mission-record.md#-남은-일-aws-배포-절차)에 정리했습니다.
 
 미션 기록(캡처, 핵심 키워드, 트러블 슈팅)은 [docs/mission-record.md](docs/mission-record.md)에 정리했습니다.
 
 ## 실행 방법
 
 1. `sql/01_schema_seed.sql`을 실행해 `umc_movie` DB와 `member`, `rating`, `favorite` 테이블, 더미 데이터를 만듭니다. (5주차와 같은 스키마)
-2. `.env.example`을 복사해 `.env`를 만들고 본인의 MySQL 정보(`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`)와 JWT 설정을 넣습니다.
-   - `JWT_SECRET`: 토큰 서명에 쓰는 비밀키. 32자 이상의 무작위 문자열로 정하고(예: `openssl rand -base64 48`), 깃허브에 올리지 않습니다. (`.env`는 `.gitignore`에 들어 있습니다)
+2. `.env.local.example`을 복사해 `.env.local`을 만들고 본인의 MySQL 정보(`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`)와 JWT 설정을 넣습니다.
+   - `JWT_SECRET`: 토큰 서명에 쓰는 비밀키. 32자 이상의 무작위 문자열로 정하고(예: `openssl rand -base64 48`), 깃허브에 올리지 않습니다. (`.env.local`, `.env.production`은 `.gitignore`에 들어 있습니다)
    - `JWT_ACCESS_EXPIRATION`: Access Token 유효시간(초). `3600`은 1시간이고, 비워 두면 3600을 씁니다.
    - `JWT_SECRET`이 비어 있거나 32자보다 짧을 때, `JWT_ACCESS_EXPIRATION`이 양의 정수(초)가 아닐 때(`1h`, `0` 등)는 서버가 켜지지 않고 이유를 알려 줍니다.
 3. 의존성 설치 후 서버를 실행합니다.
