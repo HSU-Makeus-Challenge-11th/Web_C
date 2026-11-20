@@ -1,5 +1,5 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { movieQueries } from "../../api/movies/movie-queries";
 import { ratingQueries } from "../../api/ratings/rating-queries";
 import { useMyMemberId } from "../../hooks/ratings/use-rating-mutations";
@@ -40,8 +40,7 @@ export function MyRatingList() {
             <li key={rating.ratingId} className="rounded-xl border border-line px-5 py-4">
               <div className="flex flex-wrap items-baseline gap-3">
                 <Link
-                  to="/movies/$movieId"
-                  params={{ movieId: String(rating.movieId) }}
+                  href={`/movies/${rating.movieId}`}
                   className="font-semibold hover:text-accent"
                 >
                   {movieDetailQueries[index]?.data?.title ?? `영화 #${rating.movieId}`}

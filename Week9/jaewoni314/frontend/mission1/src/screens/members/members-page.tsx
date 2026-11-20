@@ -1,4 +1,6 @@
-import { Link } from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
 import { isHTTPError } from "ky";
 import { useState, type SubmitEvent } from "react";
 import { checkEmail } from "../../api/members/check-email";
@@ -174,8 +176,7 @@ function MemberRatingsSection() {
               <li key={rating.ratingId} className="rounded-lg bg-surface p-4">
                 <div className="flex flex-wrap items-baseline gap-3">
                   <Link
-                    to="/movies/$movieId"
-                    params={{ movieId: String(rating.movieId) }}
+                    href={`/movies/${rating.movieId}`}
                     className="font-semibold hover:text-accent"
                   >
                     {rating.movieTitle ?? `영화 #${rating.movieId}`}

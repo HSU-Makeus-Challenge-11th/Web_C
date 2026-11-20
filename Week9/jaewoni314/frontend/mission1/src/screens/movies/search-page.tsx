@@ -1,5 +1,8 @@
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
-import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type SubmitEvent } from "react";
 import { movieQueries } from "../../api/movies/movie-queries";
 import { FavoriteButton } from "../../components/movies/favorite-button";
@@ -8,8 +11,8 @@ import { StatusMessage } from "../../components/movies/status-message";
 import { getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
 
 export function SearchPage() {
-  const { query = "" } = useSearch({ from: "/search" });
-  const navigate = useNavigate({ from: "/search" });
+  const query = useSearchParams().get("query") ?? "";
+  const router = useRouter();
   const [searchText, setSearchText] = useState(query);
   const [lastQuery, setLastQuery] = useState(query);
 
@@ -33,9 +36,8 @@ export function SearchPage() {
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextQuery = searchText.trim();
-    navigate({
-      search: nextQuery ? { query: nextQuery } : {},
-    });
+    // 한글 검색어도 주소에 안전하게 들어가도록 URLSearchParams로 인코딩해요.
+    router.push(nextQuery ? `/search?${new URLSearchParams({ query: nextQuery })}` : "/search");
   }
 
   return (
@@ -84,12 +86,12 @@ export function SearchPage() {
                   className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-4 sm:flex-row"
                 >
                   <Link
-                    to="/movies/$movieId"
-                    params={{ movieId: String(movie.id) }}
+                    href={`/movies/${movie.id}`}
                     className="shrink-0"
                   >
                     <MovieImage
                       className="h-[180px] w-[120px] rounded-lg"
+                      sizes="120px"
                       src={getTmdbPosterUrl(movie.poster_path)}
                       alt={`${movie.title} 포스터`}
                     />
@@ -97,7 +99,7 @@ export function SearchPage() {
 
                   <div className="flex flex-col gap-1">
                     <h3 className="text-lg font-semibold">
-                      <Link to="/movies/$movieId" params={{ movieId: String(movie.id) }}>
+                      <Link href={`/movies/${movie.id}`}>
                         {movie.title}
                       </Link>
                     </h3>
@@ -108,8 +110,7 @@ export function SearchPage() {
                     </p>
                     <div className="mt-auto flex items-center gap-5 pt-3">
                       <Link
-                        to="/movies/$movieId"
-                        params={{ movieId: String(movie.id) }}
+                        href={`/movies/${movie.id}`}
                         className="text-sm font-semibold text-accent"
                       >
                         상세 보기

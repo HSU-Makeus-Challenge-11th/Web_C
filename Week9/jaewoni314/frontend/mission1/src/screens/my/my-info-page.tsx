@@ -1,5 +1,7 @@
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { memberQueries } from "../../api/members/member-queries";
 import { favoriteQueries } from "../../api/favorites/favorite-queries";
 import { secondaryButtonClass } from "../../components/form/button-styles";
@@ -76,7 +78,7 @@ export function MyInfoPage() {
             {avatarText}
           </div>
           <Link
-            to="/my/edit"
+            href="/my/edit"
             className="absolute -bottom-1 -right-1 grid size-8 place-items-center rounded-full bg-bg text-accent hover:text-text"
             aria-label="내 정보 수정"
           >
@@ -89,7 +91,7 @@ export function MyInfoPage() {
           <p className="mt-1 break-all text-[15px] text-muted">{me.email}</p>
         </div>
 
-        <Link to="/my/edit" className={`${secondaryButtonClass} sm:ml-auto`}>
+        <Link href="/my/edit" className={`${secondaryButtonClass} sm:ml-auto`}>
           내 정보 수정
         </Link>
       </section>

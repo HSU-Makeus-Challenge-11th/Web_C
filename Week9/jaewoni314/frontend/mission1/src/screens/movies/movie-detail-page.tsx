@@ -1,5 +1,7 @@
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "@tanstack/react-router";
+import Link from "next/link";
 import { movieQueries } from "../../api/movies/movie-queries";
 import { FavoriteButton } from "../../components/movies/favorite-button";
 import { MovieImage } from "../../components/movies/movie-image";
@@ -9,8 +11,8 @@ import { formatRuntime } from "../../utils/movies/format-runtime";
 import { getMovieDetailErrorMessage } from "../../utils/movies/get-movie-detail-error-message";
 import { getTmdbBackdropUrl, getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
 
-export function MovieDetailPage() {
-  const { movieId } = useParams({ from: "/movies/$movieId" });
+// 주소의 movieId는 Server Component인 app/movies/[movieId]/page.tsx가 params에서 읽어 props로 넘겨줘요.
+export function MovieDetailPage({ movieId }: { movieId: string }) {
   const parsedMovieId = Number(movieId);
   const isValidMovieId = Number.isInteger(parsedMovieId) && parsedMovieId > 0;
 
@@ -53,24 +55,26 @@ export function MovieDetailPage() {
       <div className="relative">
         <MovieImage
           className="h-[320px] w-full sm:h-[420px]"
+          sizes="100vw"
           src={getTmdbBackdropUrl(movie.backdrop_path)}
           alt={`${movie.title} 배경 이미지`}
-          loading="eager"
+          preload
         />
         <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/60 to-bg/20" />
       </div>
 
       <div className="relative z-10 mx-auto -mt-28 max-w-[1200px] px-6 pb-16">
-        <Link to="/" className="text-sm font-medium text-muted hover:text-text">
+        <Link href="/" className="text-sm font-medium text-muted hover:text-text">
           ← 영화 목록
         </Link>
 
         <div className="mt-4 flex flex-col gap-8 sm:flex-row">
           <MovieImage
-            className="aspect-[2/3] w-[200px] shrink-0 rounded-xl shadow-lg"
+            className="aspect-[2/3] w-[200px] shrink-0 self-start rounded-xl shadow-lg"
+            sizes="200px"
             src={getTmdbPosterUrl(movie.poster_path)}
             alt={`${movie.title} 포스터`}
-            loading="eager"
+            preload
           />
 
           <div className="flex flex-col gap-2">

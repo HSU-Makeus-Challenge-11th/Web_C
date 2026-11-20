@@ -1,5 +1,7 @@
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { useState, type SubmitEvent } from "react";
 import { checkNickname } from "../../api/members/check-nickname";
 import type { MemberInfo } from "../../api/members/me";
@@ -75,7 +77,7 @@ function MyInfoEditForm({ me }: { me: MemberInfo }) {
 
   return (
     <main className="mx-auto w-full max-w-[560px] px-6 pb-20 pt-12">
-      <Link to="/my" className="text-sm font-medium text-muted hover:text-text">
+      <Link href="/my" className="text-sm font-medium text-muted hover:text-text">
         ← 내 정보
       </Link>
       <h1 className="mt-4 text-[32px] font-bold tracking-[-0.02em]">내 정보 수정</h1>
@@ -122,7 +124,7 @@ function MyInfoEditForm({ me }: { me: MemberInfo }) {
         </section>
 
         <div className="flex gap-2">
-          <Link to="/my" className={cn(secondaryButtonClass, "flex-1")}>
+          <Link href="/my" className={cn(secondaryButtonClass, "flex-1")}>
             취소
           </Link>
           <button

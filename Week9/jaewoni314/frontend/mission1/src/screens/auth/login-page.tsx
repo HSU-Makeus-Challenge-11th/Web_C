@@ -1,9 +1,13 @@
-import { Link } from "@tanstack/react-router";
-import { useState, type SubmitEvent } from "react";
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, type SubmitEvent } from "react";
 import { AuthLayout } from "../../components/auth/auth-layout";
 import { primaryButtonClass } from "../../components/form/button-styles";
 import { FormField } from "../../components/form/form-field";
 import { useLoginMutation } from "../../hooks/auth/use-login-mutation";
+import { useAuthStore } from "../../stores/auth-store";
 import { cn } from "../../utils/cn";
 import {
   MEMBER_INPUT_ERROR_MESSAGES,
@@ -20,6 +24,15 @@ type LoginFormKey = keyof typeof DEFAULT_FORM;
 export function LoginPage() {
   const [form, setForm] = useState(DEFAULT_FORM);
   const loginMutation = useLoginMutation();
+  const router = useRouter();
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const isLoggedIn = useAuthStore((state) => Boolean(state.accessToken));
+
+  // 8주차 routes/login.tsx의 beforeLoad처럼, 이미 로그인했다면 로그인 화면 대신 홈으로 보내요.
+  // 토큰은 브라우저(localStorage)에만 있어서 읽은 뒤(hasHydrated)에 확인해요.
+  useEffect(() => {
+    if (hasHydrated && isLoggedIn) router.replace("/");
+  }, [hasHydrated, isLoggedIn, router]);
 
   const email = form.email.trim();
   const isEmailValid = isValidEmail(email);
@@ -48,7 +61,7 @@ export function LoginPage() {
       footer={
         <>
           아직 회원이 아니신가요?{" "}
-          <Link to="/signup" className="font-semibold text-accent hover:underline">
+          <Link href="/signup" className="font-semibold text-accent hover:underline">
             회원가입
           </Link>
         </>

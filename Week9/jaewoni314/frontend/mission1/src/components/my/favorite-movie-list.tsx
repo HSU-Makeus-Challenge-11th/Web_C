@@ -1,5 +1,5 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { favoriteQueries } from "../../api/favorites/favorite-queries";
 import { movieQueries } from "../../api/movies/movie-queries";
 import { getApiErrorMessage } from "../../utils/get-api-error-message";
@@ -33,7 +33,7 @@ export function FavoriteMovieList() {
       {favoritesQuery.isSuccess && favorites.length === 0 && (
         <p className="mt-4 rounded-xl border border-line px-6 py-8 text-center text-sm text-muted">
           아직 즐겨찾기한 영화가 없어요.{" "}
-          <Link to="/" className="font-semibold text-accent hover:underline">
+          <Link href="/" className="font-semibold text-accent hover:underline">
             영화 둘러보기
           </Link>
         </p>
@@ -47,9 +47,10 @@ export function FavoriteMovieList() {
             return (
               <li key={favorite.favoriteId}>
                 <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-surface">
-                  <Link to="/movies/$movieId" params={{ movieId: String(favorite.movieId) }}>
+                  <Link href={`/movies/${favorite.movieId}`} className="block size-full">
                     <MovieImage
                       className="size-full"
+                      sizes="(min-width: 640px) 170px, 33vw"
                       src={movie ? getTmdbPosterUrl(movie.poster_path) : null}
                       alt={`${title} 포스터`}
                     />

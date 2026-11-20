@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import type { TmdbMovieListItem } from "../../api/movies/models";
 import { getGenreNames } from "../../utils/movies/genre-names";
 import { getTmdbPosterUrl } from "../../utils/movies/tmdb-image";
@@ -13,9 +13,11 @@ export function MovieCard({ movie }: MovieCardProps) {
   return (
     <li>
       <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-surface">
-        <Link to="/movies/$movieId" params={{ movieId: String(movie.id) }}>
+        {/* <a>는 기본이 inline이라 높이가 없어요. 안의 이미지 영역(size-full)이 카드 높이를 채우도록 block으로 바꿔요. */}
+        <Link href={`/movies/${movie.id}`} className="block size-full">
           <MovieImage
             className="size-full"
+            sizes="(min-width: 1280px) 240px, (min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
             src={getTmdbPosterUrl(movie.poster_path)}
             alt={`${movie.title} 포스터`}
           />
@@ -31,7 +33,7 @@ export function MovieCard({ movie }: MovieCardProps) {
 
       <div className="pt-3">
         <h3 className="truncate text-base font-semibold leading-[1.4]">
-          <Link to="/movies/$movieId" params={{ movieId: String(movie.id) }}>
+          <Link href={`/movies/${movie.id}`}>
             {movie.title}
           </Link>
         </h3>

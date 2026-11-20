@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useRouter } from "next/navigation";
 import { favoriteQueries } from "../../api/favorites/favorite-queries";
 import {
   useAddFavoriteMutation,
@@ -26,7 +26,7 @@ export function FavoriteButton({
   showLabel = false,
   className,
 }: FavoriteButtonProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const isLoggedIn = useAuthStore((state) => Boolean(state.accessToken));
 
   const statusQuery = useQuery({
@@ -49,7 +49,7 @@ export function FavoriteButton({
   const handleClick = () => {
     if (!isLoggedIn) {
       alert("즐겨찾기는 로그인 후 사용할 수 있어요.");
-      navigate({ to: "/login" });
+      router.push("/login");
       return;
     }
     if (isPending || isChecking) return;

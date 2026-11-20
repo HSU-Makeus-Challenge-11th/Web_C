@@ -1,4 +1,6 @@
-import { Link } from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
 import { isHTTPError } from "ky";
 import { useState, type SubmitEvent } from "react";
 import { checkEmail } from "../../api/members/check-email";
@@ -118,7 +120,7 @@ export function SignupPage() {
       footer={
         <>
           이미 계정이 있나요?{" "}
-          <Link to="/login" className="font-semibold text-accent hover:underline">
+          <Link href="/login" className="font-semibold text-accent hover:underline">
             로그인
           </Link>
         </>

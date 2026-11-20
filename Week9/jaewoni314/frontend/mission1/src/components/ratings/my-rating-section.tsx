@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { useState, type SubmitEvent } from "react";
 import type { RatingResponse } from "../../api/members/models";
 import { ratingQueries } from "../../api/ratings/rating-queries";
@@ -37,7 +37,7 @@ export function MyRatingSection({ movieId }: { movieId: number }) {
           내 평점
         </h2>
         <p className="mt-2 text-[15px] text-muted">
-          <Link to="/login" className="font-semibold text-accent hover:underline">
+          <Link href="/login" className="font-semibold text-accent hover:underline">
             로그인
           </Link>
           하고 이 영화에 평점을 남겨 보세요.

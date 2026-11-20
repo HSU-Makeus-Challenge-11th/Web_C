@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useRouter } from "next/navigation";
 import { memberMutations } from "../../api/members/member-mutations";
 import { memberQueries } from "../../api/members/member-queries";
 import { getApiErrorMessage } from "../../utils/get-api-error-message";
 
 export function useUpdateMeMutation() {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return useMutation({
     ...memberMutations.updateMe(),
@@ -15,7 +15,7 @@ export function useUpdateMeMutation() {
       // 같은 key를 쓰는 헤더와 마이페이지에 추가 요청 없이 새 닉네임이 바로 보여요.
       queryClient.setQueryData(memberQueries.me().queryKey, updatedMe);
       alert("내 정보를 수정했어요.");
-      navigate({ to: "/my" });
+      router.push("/my");
     },
     onError: (error) => {
       // 중복 확인 뒤 다른 회원이 같은 닉네임을 먼저 쓰면 409(MEMBER409_1)가 와요.

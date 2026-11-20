@@ -1,6 +1,8 @@
+"use client";
+
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { movieQueries } from "../../api/movies/movie-queries";
 import { MovieGrid } from "../../components/movies/movie-grid";
 import { Pagination } from "../../components/movies/pagination";
@@ -21,12 +23,28 @@ const cardSizeLabels: Record<CardSize, string> = {
   small: "작게",
 };
 
+// 1 이상의 정수가 아닌 page 값은 무시하고 1페이지를 보여 줘요. (8주차 routes/index.tsx의 validateSearch)
+function parsePage(value: string | null) {
+  const page = Number(value);
+  return Number.isInteger(page) && page > 0 ? page : 1;
+}
+
 export function MovieListPage() {
   // 페이지 번호를 URL에 두어 상세 화면에서 돌아오거나 새로고침해도 보던 페이지를 유지해요.
-  const { page: currentPage = 1 } = useSearch({ from: "/" });
-  const navigate = useNavigate({ from: "/" });
-  // 초기값 함수로 넘겨 첫 렌더링에서 한 번만 저장값을 읽어요.
-  const [cardSize, setCardSize] = useState(readCardSize);
+  // useSearchParams는 문자열만 돌려줘서, TanStack Router의 validateSearch가 하던 숫자 검사를 직접 해요.
+  const searchParams = useSearchParams();
+  const currentPage = parsePage(searchParams.get("page"));
+  const router = useRouter();
+  const pathname = usePathname();
+  // 서버에는 localStorage가 없어서, 초기값 함수에서 저장값을 읽으면 서버 렌더링 중에 오류가 나요.
+  // 서버와 브라우저의 첫 화면은 기본값("large")으로 똑같이 그리고, 하이드레이션이 끝난 뒤(useEffect) 저장값으로 바꿔요.
+  const [cardSize, setCardSize] = useState<CardSize>("large");
+
+  useEffect(() => {
+    // 외부 저장소(localStorage)의 값을 한 번 맞추는 용도라 effect 안에서 상태를 바꿔요.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCardSize(readCardSize());
+  }, []);
 
   const moviesQuery = useQuery({
     // key에 page가 들어 있어 페이지마다 캐시를 따로 저장해요.
@@ -42,7 +60,7 @@ export function MovieListPage() {
   const isLoadingPage = moviesQuery.isPending || moviesQuery.isPlaceholderData;
 
   function handlePageChange(page: number) {
-    navigate({ search: page === 1 ? {} : { page } });
+    router.push(page === 1 ? pathname : `${pathname}?page=${page}`);
   }
 
   function handleChangeCardSize(nextCardSize: CardSize) {

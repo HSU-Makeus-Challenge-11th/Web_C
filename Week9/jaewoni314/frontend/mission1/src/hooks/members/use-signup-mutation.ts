@@ -1,18 +1,18 @@
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useRouter } from "next/navigation";
 import { memberMutations } from "../../api/members/member-mutations";
 import { getApiErrorMessage } from "../../utils/get-api-error-message";
 
 // 7주차에는 isSubmitting으로 요청 중인지만 직접 관리했어요.
 // useMutation은 진행(isPending), 성공(isSuccess, data), 실패(isError, error) 상태를 한 번에 관리해 줘요.
 export function useSignupMutation() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return useMutation({
     ...memberMutations.signup(),
     onSuccess: (response) => {
       alert(response.message);
-      navigate({ to: "/login" });
+      router.push("/login");
     },
     onError: (error) => {
       // 실패해도 입력값은 그대로 두어 다시 요청할 수 있어요.
