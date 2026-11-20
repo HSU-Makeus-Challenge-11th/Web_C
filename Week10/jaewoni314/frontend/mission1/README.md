@@ -1,9 +1,22 @@
-# Week9 Frontend - UMCine를 Next.js로 옮기기
+# Week10 Frontend - UMCine를 Vercel에 배포하기
 
-8주차 UMCine(Vite + React + TanStack Router/Query + ky + Zustand)의 기능을 그대로 유지하면서 **Next.js 16 App Router** 프로젝트로 마이그레이션했습니다.
-백엔드는 같은 브랜치의 [Week9 NestJS 서버](../../backend/mission1/README.md)(`http://localhost:3000`)를 사용합니다.
+9주차에 Next.js로 옮긴 UMCine를 **Vercel**에 배포했습니다. 배포 주소: **https://umcine-jaewoni314.vercel.app**
+
+- 저장소: 조직 저장소에는 Vercel GitHub 앱을 설치할 권한이 없어, 개인 fork `jaewoni314/Web_C`의 `main`(운영 브랜치)을 Vercel 프로젝트 `umcine-jaewoni314`에 연결했습니다. Root Directory는 `Week10/jaewoni314/frontend/mission1`입니다.
+- 백엔드(NestJS)는 아직 배포 전이라 로그인/즐겨찾기/평점은 동작하지 않습니다. EC2에 배포한 뒤 Vercel 환경변수 `UMC_API_ORIGIN`만 등록하고 재배포하면 연결됩니다.
 
 미션 기록(캡처, 핵심 키워드, 트러블 슈팅)은 [docs/mission-record.md](docs/mission-record.md)에 정리했습니다.
+
+## Vercel 환경변수
+
+| Key | 값 | 쓰는 곳 |
+| --- | --- | --- |
+| `TMDB_API_BASE_URL` | `https://api.themoviedb.org/3` | 서버 (Route Handler, generateMetadata) |
+| `TMDB_ACCESS_TOKEN` | TMDB API 읽기 액세스 토큰 (Sensitive) | 서버 |
+| `NEXT_PUBLIC_API_BASE_URL` | `/api/umc` | 브라우저 (빌드할 때 번들에 들어감) |
+| `UMC_API_ORIGIN` | `http://{EC2_PUBLIC_IP}:3000` (백엔드 배포 후 등록) | 서버 (`next.config.ts`의 rewrite) |
+
+Vercel 페이지는 HTTPS라서 HTTP인 EC2 API를 브라우저가 직접 부르면 혼합 콘텐츠로 막힙니다. 그래서 브라우저는 같은 사이트의 `/api/umc/...`로 요청하고, Next.js가 `UMC_API_ORIGIN`으로 전달(rewrite)합니다. 로컬 개발에서는 `UMC_API_ORIGIN`을 비우고 `NEXT_PUBLIC_API_BASE_URL=http://localhost:3000`으로 직접 호출합니다.
 
 ## 실행 방법
 
