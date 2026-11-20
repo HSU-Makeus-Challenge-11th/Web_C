@@ -8,7 +8,7 @@ import { AuthGuard } from "../guard/auth.guard.js";
 import { LoginMember } from "../decorator/login-member.decorator.js";
 import { ApiAuth, ApiFail, ApiSuccess } from "../swagger/api-docs.js";
 
-@ApiTags("영화 기록 (8주차)")
+@ApiTags("영화 기록")
 @ApiAuth()
 @Controller("movie-records")
 @UseGuards(AuthGuard)

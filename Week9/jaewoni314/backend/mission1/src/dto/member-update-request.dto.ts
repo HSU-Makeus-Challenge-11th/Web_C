@@ -1,3 +1,4 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
 import { IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
 
@@ -6,6 +7,7 @@ import { IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
 // 그래서 닉네임을 아예 빼고 보냈을 때 "입력해주세요"가 먼저 보이도록 기본 검사를 아래에 뒀어요.
 export class MemberUpdateRequestDto {
   // 회원가입과 같이 앞뒤 공백을 지운 뒤 검사해서, 공백만 보낸 닉네임은 "입력해주세요"로 막아요.
+  @ApiProperty({ description: "바꿀 닉네임 (2자 이상 12자 이하)", example: "새닉네임", minLength: 2, maxLength: 12 })
   @Transform(({ value }: { value: unknown }) => (typeof value === "string" ? value.trim() : value))
   @MaxLength(12, { message: "닉네임은 12자 이하여야 합니다." })
   @MinLength(2, { message: "닉네임은 2자 이상이어야 합니다." })

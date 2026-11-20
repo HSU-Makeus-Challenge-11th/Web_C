@@ -22,9 +22,10 @@ export function ApiFail(status: HttpStatus, ...errors: (ErrorCode | { code: stri
     description: errors.map((error) => `\`${error.code}\` ${error.message}`).join(" / "),
     content: {
       "application/json": {
+        // 예시 이름은 code로 붙여요. 검증 실패(COMMON400)처럼 같은 code의 메시지가 여러 개면 뒤에 번호를 붙여 덮어쓰지 않게 해요.
         examples: Object.fromEntries(
-          errors.map((error) => [
-            error.code,
+          errors.map((error, index) => [
+            errors.findIndex((other) => other.code === error.code) === index ? error.code : `${error.code} (${index + 1})`,
             { value: { isSuccess: false, code: error.code, message: error.message, result: null } },
           ]),
         ),

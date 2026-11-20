@@ -24,7 +24,7 @@ const MOVIE_ID_PARAM = { name: "movieId", description: "TMDB 영화 ID", example
 
 // 즐겨찾기는 로그인한 회원의 데이터라서 모든 API에 AuthGuard를 붙여요.
 // URL, 바디 어디에도 memberId를 받지 않고, 누구인지는 토큰에서 알아내 @LoginMember()로 받아요.
-@ApiTags("즐겨찾기 (8주차)")
+@ApiTags("즐겨찾기")
 @ApiAuth()
 @Controller("favorites")
 @UseGuards(AuthGuard)

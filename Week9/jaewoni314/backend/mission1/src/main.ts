@@ -17,15 +17,16 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  // http://localhost:3000/docs 에서 API 문서를 보고 바로 요청해 볼 수 있어요.
+  // http://localhost:3000/swagger-ui 에서 API 문서를 보고 바로 요청해 볼 수 있어요. (문서 JSON은 /swagger-ui-json)
+  // Swagger 화면은 우리 컨트롤러가 아니라서 AuthGuard의 영향을 받지 않고, 토큰 없이 열려요.
   // 자물쇠가 있는 API는 로그인으로 받은 accessToken을 오른쪽 위 Authorize에 넣어야 해요.
   const swaggerConfig = new DocumentBuilder()
     .setTitle("UMC 영화 평점 API")
-    .setDescription("8주차: 즐겨찾기와 영화 기록(평점 + 즐겨찾기 트랜잭션) API")
-    .setVersion("8")
+    .setDescription("UMC 11기 백엔드 워크북에서 만든 회원/인증/평점/즐겨찾기/영화 기록 API 문서입니다.")
+    .setVersion("9")
     .addBearerAuth({ type: "http", scheme: "bearer", bearerFormat: "JWT" }, BEARER_AUTH)
     .build();
-  SwaggerModule.setup("docs", app, () => SwaggerModule.createDocument(app, swaggerConfig));
+  SwaggerModule.setup("swagger-ui", app, () => SwaggerModule.createDocument(app, swaggerConfig));
 
   await app.listen(process.env.PORT ?? 3000);
 }
