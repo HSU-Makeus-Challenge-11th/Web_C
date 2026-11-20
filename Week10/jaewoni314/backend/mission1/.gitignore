@@ -1,5 +1,11 @@
 node_modules
 dist
-.env
 *.tsbuildinfo
 .DS_Store
+
+# 10주차: 환경별 실제 값과 EC2 키 페어는 올리지 않아요. (*.example만 공유)
+.env
+.env.local
+.env.production
+*.pem
+!.env.*.example

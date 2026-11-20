@@ -5,11 +5,23 @@ import { AppModule } from "./app.module.js";
 import { GlobalExceptionFilter } from "./filter/global-exception.filter.js";
 import { BEARER_AUTH } from "./swagger/api-docs.js";
 
+// 10주차: 허용할 프론트 주소(Origin)를 코드에 고정하지 않고 환경변수로 받아요.
+// 여러 개면 쉼표로 구분해요. 예) FRONTEND_ORIGIN=http://localhost:5173,https://umcine.vercel.app
+// Origin은 "스킴://호스트[:포트]"까지만 같아야 해서, 끝에 /나 경로를 붙이면 브라우저의 Origin과 달라져 막혀요. 그래서 끝의 /는 지워요.
+function getAllowedOrigins() {
+  const origins = (process.env.FRONTEND_ORIGIN ?? "http://localhost:5173")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+  return origins.length > 0 ? origins : ["http://localhost:5173"];
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const allowedOrigins = getAllowedOrigins();
   app.enableCors({
-    origin: "http://localhost:5173", // 이 출처에서 오는 요청만 허용
+    origin: allowedOrigins, // 이 출처에서 오는 요청만 허용
     methods: ["GET", "POST", "PATCH", "DELETE"],
   });
 
@@ -28,6 +40,10 @@ async function bootstrap() {
     .build();
   SwaggerModule.setup("swagger-ui", app, () => SwaggerModule.createDocument(app, swaggerConfig));
 
-  await app.listen(process.env.PORT ?? 3000);
+  // EC2 밖에서 들어오는 요청을 받도록 모든 네트워크 주소(0.0.0.0)에서 기다려요. (127.0.0.1만 열면 EC2 안에서만 접속돼요.)
+  const port = Number(process.env.PORT ?? 3000);
+  await app.listen(port, "0.0.0.0");
+  // 비밀 값은 남기지 않고, 어떤 환경으로 켜졌는지만 로그로 확인해요.
+  console.log(`[${process.env.NODE_ENV ?? "local"}] http://0.0.0.0:${port} 에서 실행 중, CORS 허용: ${allowedOrigins.join(", ")}`);
 }
 await bootstrap();

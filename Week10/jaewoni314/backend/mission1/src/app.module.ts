@@ -18,7 +18,15 @@ import { MovieRecordService } from "./service/movie-record.service.js";
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    // 10주차: 환경마다 다른 설정 파일을 읽어요.
+    // - 로컬(기본): .env.local → 내 컴퓨터의 MySQL
+    // - 운영(NODE_ENV=production): .env.production → RDS. 이 파일은 EC2에만 두고 Git에 올리지 않아요. (키 목록은 .env.production.example)
+    // EC2에서 export로 넘긴 값이 있으면 파일보다 실행 환경의 값이 우선이에요. (ConfigModule은 이미 있는 process.env를 덮어쓰지 않아요.)
+    // 이 imports 배열은 위에서부터 평가되므로, 아래 TypeOrmModule.forRoot의 process.env를 읽기 전에 파일이 먼저 로드돼요.
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: process.env.NODE_ENV === "production" ? ".env.production" : ".env.local",
+    }),
     TypeOrmModule.forRoot({
       type: "mysql",
       host: process.env.DB_HOST,
@@ -27,6 +35,8 @@ import { MovieRecordService } from "./service/movie-record.service.js";
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       autoLoadEntities: true,
+      // 운영 RDS에는 실제 회원의 평점과 즐겨찾기가 쌓여요. 앱이 켜질 때 엔티티를 보고 테이블을 바꾸지 않도록 모든 환경에서 꺼 둬요.
+      // 스키마는 sql/01_schema_seed.sql로 미리 만들고, 9주차 테스트만 메모리 DB(sql.js)에서 synchronize: true를 써요.
       synchronize: false,
     }),
     TypeOrmModule.forFeature([Member, Rating, Favorite]),
