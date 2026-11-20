@@ -1,6 +1,10 @@
-# Week8 Backend - 즐겨찾기와 영화 기록, 트랜잭션 (NestJS + TypeORM)
+# Week9 Backend - 함께 테스트하고 다듬기 (NestJS + TypeORM + Vitest)
 
-7주차 로그인/JWT 인증 위에 **즐겨찾기 API 4개**와 평점과 즐겨찾기를 한 트랜잭션으로 저장하는 **영화 기록 API**를 더했습니다. 모든 API는 요청의 URL, 바디 어디에도 `memberId`를 받지 않고 토큰으로 회원을 식별합니다. 선택 미션으로 Swagger 문서(`/docs`)를 붙였습니다.
+8주차까지 만든 15개 API(회원/인증/평점/즐겨찾기/영화 기록)에 새 기능을 더하지 않고, **문서는 코드가 만들고(Swagger), 확인은 코드가 하도록(테스트 코드)** 다듬었습니다.
+
+- Swagger 문서를 `/swagger-ui`로 옮기고, 모든 API에 한 줄 설명, 토큰 필요 여부(자물쇠), 요청 예시, 성공/실패 응답(status + code)을 적었습니다.
+- 단위 테스트 4개(가짜 Repository): 즐겨찾기 중복 409, 평점 중복 `RATING409_1`, 남의 평점 수정 `RATING403_1`
+- 통합 테스트 9개(메모리 SQLite `sql.js`): 즐겨찾기 API 4개, 평점 등록 401/201, 영화 기록 트랜잭션 rollback 3개
 
 미션 기록(캡처, 핵심 키워드, 트러블 슈팅)은 [docs/mission-record.md](docs/mission-record.md)에 정리했습니다.
 
@@ -18,7 +22,24 @@ npm install
 npm run start:dev
 ```
 
-서버를 켠 뒤 http://localhost:3000/docs 에서 Swagger 문서를 보고 바로 요청해 볼 수 있습니다. 자물쇠가 있는 API는 `POST /auth/login`으로 받은 `accessToken`을 오른쪽 위 **Authorize**에 넣어야 합니다.
+서버를 켠 뒤 http://localhost:3000/swagger-ui 에서 Swagger 문서를 보고 바로 요청해 볼 수 있습니다. 자물쇠가 있는 API는 `POST /auth/login`으로 받은 `accessToken`을 오른쪽 위 **Authorize**에 넣어야 합니다.
+
+## 테스트 실행
+
+```bash
+npm test           # 단위 테스트 (src/**/*.spec.ts) - DB 없이 가짜 Repository로 Service 판단만 확인
+npm run test:e2e   # 통합 테스트 (test/**/*.e2e-spec.ts) - MySQL 대신 메모리 SQLite(sql.js)로 HTTP 요청부터 DB 저장까지 확인
+```
+
+통합 테스트는 `test/support/create-test-app.ts`에서 확인할 컨트롤러와 서비스만 메모리 DB 위에 조립하고, `main.ts`의 전역 `ValidationPipe`와 `GlobalExceptionFilter`를 똑같이 붙입니다. 개발용 MySQL은 켜져 있지 않아도 되고, 데이터도 건드리지 않습니다.
+
+| 파일 | 종류 | 확인하는 것 |
+| --- | --- | --- |
+| `src/service/favorite.service.spec.ts` | 단위 | 즐겨찾기 저장, 중복이면 `FAVORITE409_1`이고 저장하지 않음 |
+| `src/service/rating.service.spec.ts` | 단위 | 평점 중복 등록 `RATING409_1`, 남의 평점 수정 `RATING403_1` (둘 다 저장하지 않음) |
+| `test/favorite.e2e-spec.ts` | 통합 | 토큰 없이 401 `AUTH401_2`, 등록 201, 중복 409 `FAVORITE409_1`, 안 한 영화 여부 200 `isFavorite: false` |
+| `test/rating.e2e-spec.ts` | 통합 | `POST /ratings` 토큰 없이 401(저장 안 됨), 토큰 담아 201 |
+| `test/movie-record.e2e-spec.ts` | 통합 | 영화 기록 실패 시 평점까지 rollback (미리 막는 409, INSERT 뒤 UNIQUE 위반), 성공 시 둘 다 저장 |
 
 시드 회원(`noco@umc.com`, `minseo@umc.com`)의 비밀번호는 bcrypt 해시가 아닌 더미 값이라 로그인할 수 없습니다. 회원가입 API로 새 회원을 만든 뒤 로그인해 주세요.
 
@@ -133,11 +154,14 @@ src/
 ├── entity/       base-time.entity.ts, member.entity.ts, rating.entity.ts, favorite.entity.ts(8주차)
 ├── dto/          요청 DTO(login-request, member-update-request, create-member, create-rating, update-rating)와 응답 DTO
 ├── common/       api-response.ts(공통 응답), error-code.ts(오류 코드), api.exception.ts, password.ts(bcrypt cost)
-├── swagger/      api-docs.ts (Swagger 성공/실패 응답 예시 데코레이터, 8주차 선택 미션)
+├── swagger/      api-docs.ts (Swagger 자물쇠, 성공/실패 응답 예시 데코레이터)
 ├── filter/       global-exception.filter.ts(전역 예외 처리)
 ├── repository/   (NestJS는 TypeORM Repository를 Service에서 바로 주입받아 비어 있음)
 ├── app.module.ts JwtModule 등록
-└── main.ts       CORS, 전역 ValidationPipe, 전역 예외 필터
+└── main.ts       CORS, 전역 ValidationPipe, 전역 예외 필터, Swagger(/swagger-ui)
+test/
+├── support/create-test-app.ts  통합 테스트용 앱 조립 (sql.js 메모리 DB, JwtModule, 전역 파이프/필터)
+└── *.e2e-spec.ts               즐겨찾기, 평점, 영화 기록 통합 테스트
 ```
 
 이 프로젝트는 ESM(`"type": "module"`)이라 상대 경로 import에 `.js` 확장자를 붙였습니다.
