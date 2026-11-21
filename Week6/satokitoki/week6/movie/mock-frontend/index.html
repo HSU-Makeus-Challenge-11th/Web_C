@@ -1,0 +1,18 @@
+<!-- mock-frontend/index.html -->
+<!doctype html>
+<html lang="ko">
+  <body>
+    <h1>간이 프론트 : 닉네임 중복 체크</h1>
+    <button onclick="checkNickname()">'noco'으로 중복 체크</button>
+    <p id="result"></p>
+
+    <script>
+      async function checkNickname() {
+        // Spring이면 8080, NestJS면 3000으로 바꿔서 테스트하세요.
+        const res = await fetch("http://localhost:8080/members/nickname/noco");
+        const data = await res.json();
+        document.getElementById("result").innerText = JSON.stringify(data);
+      }
+    </script>
+  </body>
+</html>
