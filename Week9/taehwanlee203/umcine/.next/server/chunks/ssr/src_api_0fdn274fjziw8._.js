@@ -1,0 +1,3 @@
+module.exports=[74719,a=>{"use strict";var b=a.i(21869);async function c(){return(await b.f.get("favorites").json()).result??[]}a.s(["f",0,c])},20970,a=>{"use strict";var b=a.i(28457),c=a.i(69908);a.s(["j",0,function(a){return b.f.get(`movie/${a}`,{searchParams:{language:"ko-KR"}}).json()},"L",0,function(a){return(0,c.d)(a)&&404===a.response.status?"영화를 찾을 수 없어요.":"영화 정보를 불러오지 못했어요."}])},28457,a=>{"use strict";var b=a.i(1765),c=a.i(40678);let d=b.f.create({baseUrl:`${c.f.tmdbApiBaseUrl}/`,headers:{Authorization:`Bearer ${c.f.tmdbAccessToken}`}});a.s(["f",0,d])}];
+
+//# sourceMappingURL=src_api_0fdn274fjziw8._.js.map

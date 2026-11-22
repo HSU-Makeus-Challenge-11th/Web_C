@@ -1,0 +1,3 @@
+module.exports=[74719,a=>{"use strict";var b=a.i(21869);async function c(){return(await b.f.get("favorites").json()).result??[]}a.s(["f",0,c])},28457,a=>{"use strict";var b=a.i(1765),c=a.i(40678);let d=b.f.create({baseUrl:`${c.f.tmdbApiBaseUrl}/`,headers:{Authorization:`Bearer ${c.f.tmdbAccessToken}`}});a.s(["f",0,d])},85716,a=>{"use strict";var b=a.i(76004),c=a.i(50011),d=a.i(21869);a.s(["f",0,function(a){let e=(0,c.d)();return(0,b.f)({mutationFn:async b=>b?d.f.delete(`favorites/${a}`).json():d.f.post("favorites",{json:{movieId:a}}).json(),onSuccess:()=>{e.invalidateQueries({queryKey:["favorites",a]}),e.invalidateQueries({queryKey:["favorites"]})},onError:()=>{alert("즐겨찾기 처리에 실패했어요. 로그인 상태를 확인해 주세요.")}})}],85716)}];
+
+//# sourceMappingURL=src_0eotui38otpm2._.js.map

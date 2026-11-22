@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/app/not-found.tsx"],"sourcesContent":["export default function NotFound() {\n  return <main>페이지를 찾을 수 없어요.</main>;\n}\n"],"names":["NotFound"],"mappings":"wEAAe,SAASA,EACtB,MAAO,CAAA,EAAA,EAAA,GAAA,EAAC,OAAA,UAAK,kBACf"}
