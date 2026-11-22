@@ -1,4 +1,6 @@
-import { Link } from "@tanstack/react-router"; 
+"use client";
+
+import Link from "next/link";
 import type { TmdbMovieListItem } from "../../api/movies/models";
 import { useBookmarkStore } from "../../stores/bookmark-store"; // Zustand 스토어 불러오기
 
@@ -19,8 +21,7 @@ function MovieCard({ movie }: MovieCardProps) {
     <article className="flex w-full min-w-0 flex-col gap-1">
       <div className="relative aspect-[240/274] w-full overflow-hidden rounded-lg bg-[#f6f7f9]">
         <Link
-          to="/movies/$movieId"
-          params={{ movieId: String(movie.id) }}
+          href={`/movies/${movie.id}`}
           className="block size-full"
 >
           <img
@@ -57,7 +58,7 @@ function MovieCard({ movie }: MovieCardProps) {
         </button>
       </div>
 
-      <Link to="/movies/$movieId" params={{ movieId: String(movie.id) }}>
+      <Link href={`/movies/${movie.id}`}>
         <h3 className="truncate pt-1 text-sm font-extrabold text-[#17191e]">
           {movie.title}
        </h3>

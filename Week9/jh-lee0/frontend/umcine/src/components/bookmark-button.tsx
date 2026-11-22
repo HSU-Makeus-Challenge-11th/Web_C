@@ -1,3 +1,5 @@
+"use client";
+
 import { useBookmarkStore } from "../stores/bookmark-store";
 
 // movieId를 가진 BookmarkButtonProps라는 이름의 객체를 선언

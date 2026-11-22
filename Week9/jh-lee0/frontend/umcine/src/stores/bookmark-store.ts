@@ -36,6 +36,9 @@ export const useBookmarkStore = create<BookmarkStore>()(
       partialize: (state) => ({
         bookmarkedMovieIds: state.bookmarkedMovieIds,
       }),
+      // 9주차: 서버에는 localStorage가 없으므로 처음엔 읽지 않고,
+      // 브라우저에서 화면이 뜬 뒤 providers.tsx에서 rehydrate()로 읽어옴
+      skipHydration: true,
     },
   ),
 );

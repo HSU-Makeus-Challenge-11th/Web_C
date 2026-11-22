@@ -1,4 +1,6 @@
-import { Link } from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
 import { useAuthStore } from "@/stores/auth-store";
 import {
   useFavoriteStatusQuery,
@@ -41,7 +43,7 @@ export function FavoriteButton({ movieId }: FavoriteButtonProps) {
   // 1) 로그인 안 함 → 같은 모양의 버튼을 누르면 로그인 페이지로
   if (!accessToken) {
     return (
-      <Link to="/login" className={BUTTON_CLASS}>
+      <Link href="/login" className={BUTTON_CLASS}>
         <BookmarkIcon filled={false} />
         즐겨찾기
       </Link>

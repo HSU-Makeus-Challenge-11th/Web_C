@@ -1,6 +1,6 @@
-const tmdbApiBaseUrl = import.meta.env.VITE_TMDB_API_BASE_URL;
-const tmdbAccessToken = import.meta.env.VITE_TMDB_ACCESS_TOKEN;
-const backendApiBaseUrl = import.meta.env.VITE_BACKEND_API_BASE_URL;
+const tmdbApiBaseUrl = process.env.NEXT_PUBLIC_TMDB_API_BASE_URL;
+const tmdbAccessToken = process.env.NEXT_PUBLIC_TMDB_ACCESS_TOKEN;
+const backendApiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_API_BASE_URL;
 
 if (!tmdbApiBaseUrl || !tmdbAccessToken) {
   throw new Error("TMDB 환경 변수가 필요합니다.");
@@ -14,5 +14,5 @@ export const env = {
   tmdbApiBaseUrl,
   tmdbAccessToken,
   backendApiBaseUrl,
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || '',
+  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || '',
 };

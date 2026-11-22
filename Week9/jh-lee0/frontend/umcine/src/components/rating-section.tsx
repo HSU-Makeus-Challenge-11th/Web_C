@@ -1,5 +1,7 @@
+"use client";
+
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
 import { useAuthStore } from "@/stores/auth-store";
 import type { Rating } from "@/api/ratings/ratings";
 import {
@@ -32,7 +34,7 @@ export function RatingSection({ movieId }: RatingSectionProps) {
       {!accessToken ? (
         // 로그인 안 함 → 로그인 페이지로 가는 버튼
         <Link
-          to="/login"
+          href="/login"
           className="mt-4 flex h-11 w-full items-center justify-center rounded-md bg-[#111111] text-sm font-bold text-white"
         >
           로그인하고 평점 남기기

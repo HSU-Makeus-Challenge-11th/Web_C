@@ -1,4 +1,7 @@
-import { Link } from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { cn } from "../../utils/cn";
 // ★ 2.3 추가: 서버 데이터 조회 훅, 내 정보 조회 함수(2.2-④), 토큰 보관함(2.2-①)
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +11,12 @@ import { useAuthStore } from "@/stores/auth-store";
 export function Header() {
   // ★ 2.3 추가: 토큰 보관함에서 토큰만 꺼내 옴 (로그인 안 했으면 null)
   const accessToken = useAuthStore((state) => state.accessToken);
+
+  // 9주차: 지금 주소를 보고 어떤 메뉴를 강조할지 정함 (TanStack Router의 isActive 대신)
+  const pathname = usePathname();
+  const isMovieActive = pathname === "/";             // 영화: 정확히 "/"일 때만
+  const isSearchActive = pathname === "/search";      // 검색: ?query= 같은 검색어는 상관없이
+  const isMyActive = pathname.startsWith("/my");      // 내 정보: /my, /my/edit 모두
 
   // ★ 2.3 추가: 내 정보 조회 (GET /members/me)
   const meQuery = useQuery({
@@ -23,7 +32,7 @@ export function Header() {
       <div className="mx-auto flex h-full w-[calc(100%-48px)] max-w-[1280px] items-center justify-between">
         <div className="flex items-center">
           <Link
-            to="/"
+            href="/"
             className="inline-flex items-center gap-2 text-base font-extrabold tracking-[-0.02em] text-gray-900"
             aria-label="UMCine 홈"
           >
@@ -34,61 +43,50 @@ export function Header() {
           </Link>
 
           <nav className="ml-10 flex gap-8" aria-label="주요 메뉴">
-            <Link to="/" activeOptions={{ exact: true }}>
-              {({ isActive }) => (
-                <span
-                  className={cn(
-                    "inline-block border-b-2 py-2 text-sm font-semibold",
-                    isActive
-                      ? "border-gray-900 text-gray-900"
-                      : "border-transparent text-[#7b818b]"
-                  )}
-                >
-                  영화
-                </span>
-              )}
+            <Link href="/">
+              <span
+                className={cn(
+                  "inline-block border-b-2 py-2 text-sm font-semibold",
+                  isMovieActive
+                    ? "border-gray-900 text-gray-900"
+                    : "border-transparent text-[#7b818b]"
+                )}
+              >
+                영화
+              </span>
             </Link>
 
-            <Link
-              to="/search"
-              search={{}}
-              activeOptions={{ includeSearch: false }}
-            >
-              {({ isActive }) => (
-                <span
-                  className={cn(
-                    "inline-block border-b-2 py-2 text-sm font-semibold",
-                    isActive
-                      ? "border-gray-900 text-gray-900"
-                      : "border-transparent text-[#7b818b]"
-                  )}
-                >
-                  검색
-                </span>
-              )}
+            <Link href="/search">
+              <span
+                className={cn(
+                  "inline-block border-b-2 py-2 text-sm font-semibold",
+                  isSearchActive
+                    ? "border-gray-900 text-gray-900"
+                    : "border-transparent text-[#7b818b]"
+                )}
+              >
+                검색
+              </span>
             </Link>
 
-            <Link to="/my">
-              {({ isActive }) => (
-                <span
-                  className={cn(
-                    "inline-block border-b-2 py-2 text-sm font-semibold",
-                    isActive
-                      ? "border-gray-900 text-gray-900"
-                      : "border-transparent text-[#7b818b]"
-                  )}
-                >
-                  내 정보
-                </span>
-              )}
+            <Link href="/my">
+              <span
+                className={cn(
+                  "inline-block border-b-2 py-2 text-sm font-semibold",
+                  isMyActive
+                    ? "border-gray-900 text-gray-900"
+                    : "border-transparent text-[#7b818b]"
+                )}
+              >
+                내 정보
+              </span>
             </Link>
           </nav>
         </div>
 
         <div className="flex items-center gap-3">
           <Link
-            to="/search"
-            search={{}}
+            href="/search"
             className="grid size-9 place-items-center rounded-lg hover:bg-gray-100"
             aria-label="영화 검색"
           >
@@ -99,7 +97,7 @@ export function Header() {
           {!accessToken ? (
             // ① 토큰 없음 → 로그인 링크
             <Link
-              to="/login"
+              href="/login"
               className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
             >
               로그인
@@ -110,7 +108,7 @@ export function Header() {
           ) : (
             // ③ 토큰 있고, 조회 끝남 → 마이페이지 링크
             <Link
-              to="/my"
+              href="/my"
               className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
             >
               마이페이지
