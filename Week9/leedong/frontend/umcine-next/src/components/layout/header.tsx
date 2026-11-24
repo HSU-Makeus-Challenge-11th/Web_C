@@ -1,0 +1,43 @@
+"use client";
+
+import Link from "next/link";
+import { useMeQuery } from "@/hooks/use-me-query";
+import { useAuthStore } from "@/stores/auth-store";
+
+export function Header() {
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const hydrated = useAuthStore((state) => state.hydrated);
+  const meQuery = useMeQuery();
+
+  return (
+    <header className="flex h-[91px] items-center justify-between border-b border-[#e3e6eb] bg-white px-20 py-6">
+      <div className="flex items-center gap-[42px]">
+        <Link href="/" className="flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-[#17191e]">
+            <span className="icon icon-movie" />
+          </span>
+          <span className="text-xl font-black tracking-[-0.7px]">UMCine</span>
+        </Link>
+        <nav className="flex items-center gap-[30px]">
+          <Link href="/" className="text-sm font-bold text-[#17191e] underline">영화</Link>
+          <Link href="/search" className="text-sm font-bold text-[#606774]">검색</Link>
+          <Link href="/my" className="text-sm font-bold text-[#606774]">내 정보</Link>
+        </nav>
+      </div>
+      <div className="flex items-center gap-2.5">
+        <button className="flex h-[42px] w-[42px] items-center justify-center rounded-lg border border-[#e3e6eb] bg-white text-[#606774]" type="button" aria-label="영화 검색">
+          <span className="icon icon-search" />
+        </button>
+        {!hydrated ? (
+          <span className="h-[42px] w-24 animate-pulse rounded-lg bg-gray-200" />
+        ) : !accessToken ? (
+          <Link href="/login" className="flex h-[42px] items-center rounded-lg border border-white bg-[#2563eb] px-4 text-sm font-extrabold text-white">로그인</Link>
+        ) : meQuery.isLoading ? (
+          <span className="h-[42px] w-24 animate-pulse rounded-lg bg-gray-200" />
+        ) : (
+          <Link href="/my" className="flex h-[42px] items-center rounded-lg border border-white bg-[#2563eb] px-4 text-sm font-extrabold text-white">마이페이지</Link>
+        )}
+      </div>
+    </header>
+  );
+}

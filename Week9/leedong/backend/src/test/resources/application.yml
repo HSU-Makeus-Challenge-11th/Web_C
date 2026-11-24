@@ -1,0 +1,15 @@
+# 테스트가 돌 때만 쓰는 설정입니다. src/main/resources/application.yml 대신 이 파일이 읽힙니다.
+# MySQL 대신 메모리 DB(H2)를 써서, 개발용 DB를 건드리지 않고 매번 깨끗한 상태로 시작합니다.
+spring:
+  datasource:
+    url: jdbc:h2:mem:umcine-test;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop   # 테스트가 시작될 때 엔티티로 테이블을 만들고, 끝나면 지웁니다
+    open-in-view: false
+
+jwt:
+  secret: test-secret-key-for-umcine-api-tests-0123456789   # HMAC 키는 32바이트 이상이어야 합니다
+  access-expiration: 3600
