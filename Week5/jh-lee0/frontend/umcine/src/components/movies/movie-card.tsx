@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"; 
 import type { TmdbMovieListItem } from "../../api/movies/models";
 import { useBookmarkStore } from "../../stores/bookmark-store"; // Zustand 스토어 불러오기
 
@@ -17,15 +18,21 @@ function MovieCard({ movie }: MovieCardProps) {
   return (
     <article className="flex w-full min-w-0 flex-col gap-1">
       <div className="relative aspect-[240/274] w-full overflow-hidden rounded-lg bg-[#f6f7f9]">
-        <img
-          className="size-full object-cover"
-          src={
-            movie.poster_path
-              ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-              : undefined
-          }
-          alt={movie.title}
-        />
+        <Link
+          to="/movies/$movieId"
+          params={{ movieId: String(movie.id) }}
+          className="block size-full"
+>
+          <img
+            className="size-full object-cover"
+            src={
+              movie.poster_path
+               ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                : undefined
+           }
+            alt={movie.title}
+         />
+        </Link>
 
         {/* 3. Zustand 스토어 상태(isBookmarked, toggleBookmark)로 버튼 제어 */}
         <button
@@ -50,9 +57,11 @@ function MovieCard({ movie }: MovieCardProps) {
         </button>
       </div>
 
-      <h3 className="truncate pt-1 text-sm font-extrabold text-[#17191e]">
-        {movie.title}
-      </h3>
+      <Link to="/movies/$movieId" params={{ movieId: String(movie.id) }}>
+        <h3 className="truncate pt-1 text-sm font-extrabold text-[#17191e]">
+          {movie.title}
+       </h3>
+      </Link>
       <p className="text-xs font-normal text-[#969da8]">{movie.release_date}</p>
     </article>
   );
