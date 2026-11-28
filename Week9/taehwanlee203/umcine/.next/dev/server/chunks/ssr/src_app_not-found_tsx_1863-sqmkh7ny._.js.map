@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/taehwanmac/Desktop/HSU/UMC/week2/umcine/src/app/not-found.tsx"],"sourcesContent":["export default function NotFound() {\n  return <main>페이지를 찾을 수 없어요.</main>;\n}\n"],"names":["NotFound"],"mappings":";;;;;;AAAe,SAASA;IACtB,qBAAO,kbAAC;kBAAK;;;;;;AACf"}}]
+}

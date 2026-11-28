@@ -1,0 +1,3 @@
+module.exports=[52944,a=>{"use strict";var b=a.i(61515),c=a.i(64824),d=a.i(15772),e=a.i(66206);function f({children:a}){return(0,b.jsx)("div",{children:a})}a.s(["default",0,function({children:a}){let g=(0,d.useRouter)(),h=(0,e.f)(a=>a.accessToken);return((0,c.useEffect)(()=>{h||g.replace("/login")},[h,g]),h)?(0,b.jsx)(f,{children:a}):null}],52944)}];
+
+//# sourceMappingURL=src_app_%28authenticated%29_layout_tsx_1japfjz19du2r._.js.map
